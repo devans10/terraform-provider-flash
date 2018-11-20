@@ -52,7 +52,7 @@ func resourcePureVolumeCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(*v)
-        return resourceVolumeRead(d, m)
+        return resourcePureVolumeRead(d, m)
 }
 
 func resourcePureVolumeRead(d *schema.ResourceData, m interface{}) error {
@@ -72,7 +72,7 @@ func resourcePureVolumeRead(d *schema.ResourceData, m interface{}) error {
         return nil
 }
 
-func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
+func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
         var v *string
 
         client := m.(*pureClient.Client)
@@ -83,10 +83,10 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
         }
 
         d.SetId(*v)
-        return resourceVolumeRead(d, m)
+        return resourcePureVolumeRead(d, m)
 }
 
-func resourceVolumeDelete(d *schema.ResourceData, m interface{}) error {
+func resourcePureVolumeDelete(d *schema.ResourceData, m interface{}) error {
         client := m.(*pureClient.Client)
         err := client.Vols.DeleteVol(d.Id())
 
