@@ -1,15 +1,16 @@
 package main
 
 import (
+	"github`.com/devans10/go-pure-client/pureClient"
         "github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceVolume() *schema.Resource {
+func resourcePureVolume() *schema.Resource {
         return &schema.Resource{
-                Create: resourceVolumeCreate,
-                Read:   resourceVolumeRead,
-                Update: resourceVolumeUpdate,
-                Delete: resourceVolumeDelete,
+                Create: resourcePureVolumeCreate,
+                Read:   resourcePureVolumeRead,
+                Update: resourcePureVolumeUpdate,
+                Delete: resourcePureVolumeDelete,
 
                 Schema: map[string]*schema.Schema{
                         "name": &schema.Schema{
@@ -20,40 +21,79 @@ func resourceVolume() *schema.Resource {
                                 Type:     schema.TypeString,
                                 Required: true,
                         },
+			"source": &schema.Schema{
+				Type:	  schema.TypeString,
+				Required: false,
+				Optional: true,
+				Computed: true,
+			},
+			"serial": &schema.Schema{
+				Type:	  schema.TypeString,
+				Required: true,
+				Computed: true,
+			},
+			"created": &schema.Schema{
+				Type:	  schema.TypeString,
+				Required: true,
+				Computed: true,
+			},
                 },
         }
 }
 
-func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
-	name := d.Get("name").(string)
-	d.SetId(name)
+func resourcePureVolumeCreate(d *schema.ResourceData, m interface{}) error {
+	var v *string
+
+	client := m.(*pureClient.Client)
+
+	v, err = client.Vols.CreateVol(d)
+	if err != nil {
+		return err
+	}
+
+	d.SetId(*v)
         return resourceVolumeRead(d, m)
 }
 
-func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*MyClient)
+func resourcePureVolumeRead(d *schema.ResourceData, m interface{}) error {
+	client := m.(*pureClient.Client)
 
-	// Attempt to read from an upstream API
-        obj, ok := client.Get(d.Id())
+        vol, ok := client.Vols.Read(d.Id())
 
-        // If the resource does not exist, inform Terraform. We want to immediately
-        // return here to prevent further processing.
-        if !ok {
+        if vol == nil {
           d.SetId("")
           return nil
         }
 
-        d.Set("name", obj.Name)
+        d.Set("name", vol.Name)
+	d.Set("size", vol.Size)
+	d.Set("serial", vol.Serial)
+	d.Set("created", vol.Created)
         return nil
 }
 
 func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
+        var v *string
+
+        client := m.(*pureClient.Client)
+
+        v, err = client.Vols.UpdateVol(d)
+        if err != nil {
+                return err
+        }
+
+        d.SetId(*v)
         return resourceVolumeRead(d, m)
 }
 
 func resourceVolumeDelete(d *schema.ResourceData, m interface{}) error {
-	// d.SetId("") is automatically called assuming delete returns no errors, but
-        // it is added here for explicitness.
+        client := m.(*pureClient.Client)
+        err := client.Vols.DeleteVol(d.Id())
+
+        if err != nil {
+          return err
+        }
+
 	d.SetId("")
         return nil
 }
