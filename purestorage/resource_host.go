@@ -1,7 +1,7 @@
-package main
+package purestorage
 
 import (
-	"github`.com/devans10/go-pure-client/pureClient"
+	"github.com/devans10/go-pure-client/pureClient"
         "github.com/hashicorp/terraform/helper/schema"
 )
 
