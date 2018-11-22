@@ -8,7 +8,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-func Provider() *terraform.ResourceProvider {
+func Provider() terraform.ResourceProvider {
         return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"user": &schema.Schema{

@@ -26,7 +26,7 @@ func resourcePureHostgroupCreate(d *schema.ResourceData, m interface{}) error {
 
 	client := m.(*pureClient.Client)
 
-	v, err = client.Hostgroups.CreateHostgroup(d)
+	v, err := client.Hostgroups.CreateHostgroup(d)
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func resourcePureHostgroupUpdate(d *schema.ResourceData, m interface{}) error {
 
         client := m.(*pureClient.Client)
 
-        v, err = client.Hostgroups.UpdateHostgroup(d)
+	v, err := client.Hostgroups.UpdateHostgroup(d)
         if err != nil {
                 return err
         }
