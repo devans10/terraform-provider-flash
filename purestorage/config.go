@@ -4,34 +4,39 @@ import (
 	"log"
 	"os"
 
-	"github.com/devans10/go-pure-client/pureClient"
+	"github.com/devans10/go-purestorage/flasharray"
 )
 
 type Config struct {
-	User		string	`mapstructure:"user"`
+	Username	string	`mapstructure:"username"`
 	Password	string	`mapstructure:"password"`
-	Entrypoint	string	`mapstructure:"entrypoint"`
+	Target		string	`mapstructure:"target"`
 	ApiToken	string	`mapstructure:"api_token"`
+	Rest_version	string	`mapstructure:"rest_version"`
+	Verify_https	bool	`mapstructure:"verify_https"`
+	Ssl_cert	bool	`mapstructure:"ssl_cert"`
+	User_agent	string	`mapsturcture:"user_agent"`
+	Request_kwargs	map[string]string	`mapstructure:"request_kwargs"`
 }
 
-// Client() returns a new client for accessing pingdom.
+// Client() returns a new client for accessing flasharray.
 //
-func (c *Config) Client() (*pureClient.Client, error) {
+func (c *Config) Client() (*flasharray.Client, error) {
 
 	if v := os.Getenv("PURE_USERNAME"); v != "" {
-		c.User = v
+		c.Username = v
 	}
 	if v := os.Getenv("PURE_PASSWORD"); v != "" {
 		c.Password = v
 	}
-	if v := os.Getenv("PURE_ENTRYPOINT"); v != "" {
-		c.Entrypoint = v
+	if v := os.Getenv("PURE_TARGET"); v != "" {
+		c.Target = v
 	}
 	if v := os.Getenv("PURE_APITOKEN"); v != "" {
                 c.ApiToken = v
         }
 
-	client, err := pureClient.NewClient(c.User, c.Password, c.Entrypoint, c.ApiToken)
+	client, err := flasharray.NewClient(c.Target, c.Username, c.Password, c.ApiToken, c.Rest_version, c.Verify_https, c.Ssl_cert, c.User_agent, c.Request_kwargs)
 	if err != nil {
 		return nil, err
 	}

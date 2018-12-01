@@ -11,7 +11,7 @@ import (
 func Provider() terraform.ResourceProvider {
         return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"user": &schema.Schema{
+			"username": &schema.Schema{
 				Type:		schema.TypeString,
 				Optional:	true,
 			},
@@ -21,9 +21,46 @@ func Provider() terraform.ResourceProvider {
 				Optional: true,
 			},
 
-			"entrypoint": &schema.Schema{
+			"api_token": &schema.Schema{
+                                Type:     schema.TypeString,
+                                Optional: true,
+				ConflictsWith: "password",
+                        },
+
+			"target": &schema.Schema{
 				Type:     schema.TypeString,
+				Optional: false,
+				Required: true,
+			},
+
+			"rest_version": &schema.Schema{
+				Type:	  schema.TypeString,
 				Optional: true,
+				Default:  "",
+			},
+
+			"verify_https": &schema.Schema{
+				Type: 	  schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+
+			"ssl_cert": &schema.Schema{
+				Type:	  schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+
+			"user_agent": &schema.Schema{
+				Type:	  schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+
+			"request_kwargs": &schema.Schema{
+				Type:	  schema.TypeMap,
+				Optional: true,
+				Default:  nil,
 			},
 		},
                 ResourcesMap: map[string]*schema.Resource{

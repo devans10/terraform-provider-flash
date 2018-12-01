@@ -1,7 +1,7 @@
 package purestorage
 
 import (
-	"github.com/devans10/go-pure-client/pureClient"
+	"github.com/devans10/go-purestorage/flasharray"
         "github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -19,7 +19,8 @@ func resourcePureVolume() *schema.Resource {
                         },
 			"size": &schema.Schema{
                                 Type:     schema.TypeString,
-                                Required: true,
+				Optional: true,
+				Computed: true,
                         },
 			"source": &schema.Schema{
 				Type:	  schema.TypeString,
@@ -29,12 +30,12 @@ func resourcePureVolume() *schema.Resource {
 			},
 			"serial": &schema.Schema{
 				Type:	  schema.TypeString,
-				Required: true,
+				Optional: true,
 				Computed: true,
 			},
 			"created": &schema.Schema{
 				Type:	  schema.TypeString,
-				Required: true,
+				Optional: true,
 				Computed: true,
 			},
                 },
@@ -42,23 +43,28 @@ func resourcePureVolume() *schema.Resource {
 }
 
 func resourcePureVolumeCreate(d *schema.ResourceData, m interface{}) error {
-	var v *string
+	client := m.(*flasharray.Client)
 
-	client := m.(*pureClient.Client)
-
-	v, err = client.Vols.CreateVol(d)
-	if err != nil {
-		return err
+	if d.source == "" {
+		v, err := client.Vols.CreateVolume(d.name, d.size, nil)
+		if err != nil {
+			return err
+		}
+	} else {
+		v, err := client.Vols.CopyVolume(d.name, d.source, nil)
+		if err != nil {
+                        return err
+                }
 	}
 
-	d.SetId(*v)
+	d.SetId(v.Name)
         return resourcePureVolumeRead(d, m)
 }
 
 func resourcePureVolumeRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*pureClient.Client)
+	client := m.(*flasharray.Client)
 
-        vol, ok := client.Vols.Read(d.Id())
+        vol, ok := client.Vols.GetVolume(d.Id(), nil)
 
         if vol == nil {
           d.SetId("")
@@ -69,26 +75,34 @@ func resourcePureVolumeRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("size", vol.Size)
 	d.Set("serial", vol.Serial)
 	d.Set("created", vol.Created)
+	d.Set("source", vol.Source)
         return nil
 }
 
 func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
-        var v *string
+        client := m.(*flasharray.Client)
 
-        client := m.(*pureClient.Client)
+	oldVol, ok := client.Vols.GetVolume(d.Id(), nil)
 
-        v, err = client.Vols.UpdateVol(d)
-        if err != nil {
-                return err
+	if vol == nil {
+          d.SetId("")
+          return nil
         }
 
-        d.SetId(*v)
+	if d.name != oldVol.Name {
+		v, err := client.Vols.RenameVolume(d.Id(), d.name)
+		if  err != nil {
+			return err
+		}
+	}
+
+        d.SetId(v.Name))
         return resourcePureVolumeRead(d, m)
 }
 
 func resourcePureVolumeDelete(d *schema.ResourceData, m interface{}) error {
-        client := m.(*pureClient.Client)
-        err := client.Vols.DeleteVol(d.Id())
+        client := m.(*flasharray.Client)
+        _, err := client.Vols.DeleteVolume(d.Id())
 
         if err != nil {
           return err

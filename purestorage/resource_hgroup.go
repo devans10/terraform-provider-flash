@@ -1,7 +1,7 @@
 package purestorage
 
 import (
-	"github.com/devans10/go-pure-client/pureClient"
+	"github.com/devans10/go-purestorage/flasharray"
         "github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -17,6 +17,10 @@ func resourcePureHostgroup() *schema.Resource {
                                 Type:     schema.TypeString,
                                 Required: true,
                         },
+			"hosts": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+			},
                 },
         }
 }
@@ -24,7 +28,7 @@ func resourcePureHostgroup() *schema.Resource {
 func resourcePureHostgroupCreate(d *schema.ResourceData, m interface{}) error {
 	var v *string
 
-	client := m.(*pureClient.Client)
+	client := m.(*flasharray.Client)
 
 	v, err := client.Hostgroups.CreateHostgroup(d)
 	if err != nil {
@@ -36,7 +40,7 @@ func resourcePureHostgroupCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePureHostgroupRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*pureClient.Client)
+	client := m.(*flasharray.Client)
 
         hgroup, ok := client.Hostgroups.Read(d.Id())
 
@@ -52,7 +56,7 @@ func resourcePureHostgroupRead(d *schema.ResourceData, m interface{}) error {
 func resourcePureHostgroupUpdate(d *schema.ResourceData, m interface{}) error {
         var v *string
 
-        client := m.(*pureClient.Client)
+        client := m.(*flasharray.Client)
 
 	v, err := client.Hostgroups.UpdateHostgroup(d)
         if err != nil {
@@ -64,7 +68,7 @@ func resourcePureHostgroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePureHostgroupDelete(d *schema.ResourceData, m interface{}) error {
-        client := m.(*pureClient.Client)
+        client := m.(*flasharray.Client)
         err := client.Hostgroups.DeleteHostgroup(d.Id())
 
         if err != nil {
