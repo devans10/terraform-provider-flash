@@ -24,7 +24,6 @@ func Provider() terraform.ResourceProvider {
 			"api_token": &schema.Schema{
                                 Type:     schema.TypeString,
                                 Optional: true,
-				ConflictsWith: "password",
                         },
 
 			"target": &schema.Schema{

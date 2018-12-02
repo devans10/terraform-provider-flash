@@ -41,7 +41,7 @@ func (c *Config) Client() (*flasharray.Client, error) {
 		return nil, err
 	}
 
-	log.Printf("[INFO] Pure Client configured for user: %s", c.User)
+	log.Printf("[INFO] Pure Client configured for target: %s", c.Target)
 
 	return client, err
 }

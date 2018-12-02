@@ -19,6 +19,7 @@ func resourcePureHostgroup() *schema.Resource {
                         },
 			"hosts": &schema.Schema{
 				Type:     schema.TypeList,
+				Elem:	  schema.TypeString,
 				Optional: true,
 			},
                 },
@@ -26,50 +27,49 @@ func resourcePureHostgroup() *schema.Resource {
 }
 
 func resourcePureHostgroupCreate(d *schema.ResourceData, m interface{}) error {
-	var v *string
-
 	client := m.(*flasharray.Client)
 
-	v, err := client.Hostgroups.CreateHostgroup(d)
+	v, _ := d.GetOk("name")
+	host, err := client.Hostgroups.CreateHostgroup(v.(string), nil)
 	if err != nil {
 		return err
 	}
 
-	d.SetId(*v)
+	d.SetId(host.Name)
         return resourcePureHostgroupRead(d, m)
 }
 
 func resourcePureHostgroupRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*flasharray.Client)
 
-        hgroup, ok := client.Hostgroups.Read(d.Id())
+        h, _ := client.Hostgroups.GetHostgroup(d.Id(), nil)
 
-        if hgroup == nil {
+        if h == nil {
           d.SetId("")
           return nil
         }
 
-        d.Set("name", hgroup.Name)
+        d.Set("name", h.Name)
+	d.Set("hosts", h.Hosts)
         return nil
 }
 
 func resourcePureHostgroupUpdate(d *schema.ResourceData, m interface{}) error {
-        var v *string
-
         client := m.(*flasharray.Client)
 
-	v, err := client.Hostgroups.UpdateHostgroup(d)
+	v, _ := d.GetOk("name")
+	h, err := client.Hostgroups.RenameHostgroup(d.Id(), v.(string), nil)
         if err != nil {
                 return err
         }
 
-        d.SetId(*v)
+        d.SetId(h.Name)
         return resourcePureHostgroupRead(d, m)
 }
 
 func resourcePureHostgroupDelete(d *schema.ResourceData, m interface{}) error {
         client := m.(*flasharray.Client)
-        err := client.Hostgroups.DeleteHostgroup(d.Id())
+        _, err := client.Hostgroups.DeleteHostgroup(d.Id(), nil)
 
         if err != nil {
           return err

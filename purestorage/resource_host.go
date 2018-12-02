@@ -36,23 +36,22 @@ func resourcePureHost() *schema.Resource {
 }
 
 func resourcePureHostCreate(d *schema.ResourceData, m interface{}) error {
-	var v *string
-
 	client := m.(*flasharray.Client)
 
-	v, err = client.Hosts.CreateHost(d)
+	v, _ := d.GetOk("name")
+	h, err := client.Hosts.CreateHost(v.(string), nil)
 	if err != nil {
 		return err
 	}
 
-	d.SetId(*v)
+	d.SetId(h.Name)
         return resourcePureHostRead(d, m)
 }
 
 func resourcePureHostRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*flasharray.Client)
 
-        host, ok := client.Hosts.Read(d.Id())
+        host, _ := client.Hosts.GetHost(d.Id(), nil)
 
         if host == nil {
           d.SetId("")
@@ -60,28 +59,27 @@ func resourcePureHostRead(d *schema.ResourceData, m interface{}) error {
         }
 
         d.Set("name", host.Name)
-	d.Set("iqn", host.Size)
-	d.Set("wwn", host.Serial)
+	d.Set("iqn", host.Iqn)
+	d.Set("wwn", host.Wwn)
         return nil
 }
 
 func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
-        var v *string
-
         client := m.(*flasharray.Client)
 
-        v, err = client.Hosts.UpdateHost(d)
+	v, _ := d.GetOk("name")
+	h, err := client.Hosts.RenameHost(d.Id(), v.(string), nil)
         if err != nil {
                 return err
         }
 
-        d.SetId(*v)
+        d.SetId(h.Name)
         return resourcePureHostRead(d, m)
 }
 
 func resourcePureHostDelete(d *schema.ResourceData, m interface{}) error {
         client := m.(*flasharray.Client)
-        err := client.Hosts.DeleteHost(d.Id())
+        _, err := client.Hosts.DeleteHost(d.Id(), nil)
 
         if err != nil {
           return err
