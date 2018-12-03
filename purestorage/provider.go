@@ -3,17 +3,17 @@ package purestorage
 import (
 	"log"
 
-        "github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mitchellh/mapstructure"
 )
 
 func Provider() terraform.ResourceProvider {
-        return &schema.Provider{
+	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"username": &schema.Schema{
-				Type:		schema.TypeString,
-				Optional:	true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"password": &schema.Schema{
@@ -22,9 +22,9 @@ func Provider() terraform.ResourceProvider {
 			},
 
 			"api_token": &schema.Schema{
-                                Type:     schema.TypeString,
-                                Optional: true,
-                        },
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 
 			"target": &schema.Schema{
 				Type:     schema.TypeString,
@@ -33,42 +33,42 @@ func Provider() terraform.ResourceProvider {
 			},
 
 			"rest_version": &schema.Schema{
-				Type:	  schema.TypeString,
+				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "",
 			},
 
 			"verify_https": &schema.Schema{
-				Type: 	  schema.TypeBool,
+				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
 
 			"ssl_cert": &schema.Schema{
-				Type:	  schema.TypeBool,
+				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
 
 			"user_agent": &schema.Schema{
-				Type:	  schema.TypeString,
+				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "",
 			},
 
 			"request_kwargs": &schema.Schema{
-				Type:	  schema.TypeMap,
+				Type:     schema.TypeMap,
 				Optional: true,
 				Default:  nil,
 			},
 		},
-                ResourcesMap: map[string]*schema.Resource{
-			"pure_volume": resourcePureVolume(),
-			"pure_host": resourcePureHost(),
-			"pure_hostgroup": resourcePureHostgroup(),
+		ResourcesMap: map[string]*schema.Resource{
+			"purestorage_volume":    resourcePureVolume(),
+			"purestorage_host":      resourcePureHost(),
+			"purestorage_hostgroup": resourcePureHostgroup(),
 		},
 		ConfigureFunc: providerConfigure,
-        }
+	}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
