@@ -17,11 +17,39 @@ Requirements
 Usage
 ---------------------
 
+**provider.purestorage: new or changed plugin executable**
+
 ```
-# For example, restrict template version in 0.1.x
-provider "template" {
-  version = "~> 0.1"
+export TF_SKIP_PROVIDER_VERIFY=1
+```
+
+**Configure the Provider**
+
+***Configure in TF configuration***
+
+```
+provider "purestorage" {
+  api_token  = "${var.purestorage_apitoken}"
+  target     = "${var.purestorage_target}"
 }
+```
+
+or
+
+```
+provider "purestorage" {
+  username   = "${var.purestorage_username}"
+  password   = "${var.purestorage_password}"
+  target     = "${var.purestorage_target}"
+}
+```
+
+
+***Configure in environment***
+
+Set username(`PURESTORAGE_USERNAME`) and password(`PURESTORAGE_PASSWORD`) and endpoint(`PURESTORAGE_TARGET`) in environment
+```
+provider "purestorage" {}
 ```
 
 Building The Provider
@@ -43,7 +71,38 @@ $ make build
 
 Using the provider
 ----------------------
-## Fill in for each provider
+
+**Basic volume provision**
+
+Create one volume
+```
+resource "purestorage_volume" "testvol_tf" {
+	name = "testvol_tf"
+	size = "1G"
+}
+```
+
+Copy a volume
+```
+resource "purestorage_volume" "testvol_tf_copy" {
+	name = "testvol_tf_copy"
+	source = "testvol_tf"
+}
+```
+
+Create a host
+```
+resource "purestorage_host" "testhosttf" {
+	name = "testhosttf"
+}
+```
+
+Create a hostgroup
+```
+resource "purestorage_hostgroup" "testhgrouptf" {
+	name = "testhgrouptf" 
+}
+```
 
 Developing the Provider
 ---------------------------
@@ -63,12 +122,4 @@ In order to test the provider, you can simply run `make test`.
 
 ```sh
 $ make test
-```
-
-In order to run the full suite of Acceptance tests, run `make testacc`.
-
-*Note:* Acceptance tests create real resources, and often cost money to run.
-
-```sh
-$ make testacc
 ```
