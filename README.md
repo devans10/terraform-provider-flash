@@ -24,6 +24,14 @@ Usage
 export TF_SKIP_PROVIDER_VERIFY=1
 ```
 
+Add the following to `$HOME/.terraformrc`
+
+```
+providers {
+    purestorage = "$GOPATH/bin/terraform-provider-purestorage"
+}
+```
+
 **Configure the Provider**
 
 ***Configure in TF configuration***
