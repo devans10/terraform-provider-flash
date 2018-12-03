@@ -23,6 +23,7 @@ func resourcePureHostgroup() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Optional: true,
+				Default:  nil,
 			},
 		},
 	}
@@ -32,12 +33,19 @@ func resourcePureHostgroupCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*flasharray.Client)
 
 	v, _ := d.GetOk("name")
-	host, err := client.Hostgroups.CreateHostgroup(v.(string), nil)
+	var hosts []string
+	if h, ok := d.GetOk("hosts"); ok {
+		for _, element := range h.([]interface{}) {
+			hosts = append(hosts, element.(string))
+		}
+	}
+	data := map[string][]string{"hostlist": hosts}
+	hgroup, err := client.Hostgroups.CreateHostgroup(v.(string), data, nil)
 	if err != nil {
 		return err
 	}
 
-	d.SetId(host.Name)
+	d.SetId(hgroup.Name)
 	return resourcePureHostgroupRead(d, m)
 }
 
