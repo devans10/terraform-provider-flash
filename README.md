@@ -13,6 +13,7 @@ Requirements
 
 -	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
 -	[Go](https://golang.org/doc/install) 1.8 (to build the provider plugin)
+-	[Pure Storage Go Client](https://github.com/devans10/go-purestorage)
 
 Usage
 ---------------------
@@ -21,6 +22,14 @@ Usage
 
 ```
 export TF_SKIP_PROVIDER_VERIFY=1
+```
+
+Add the following to `$HOME/.terraformrc`
+
+```
+providers {
+    purestorage = "$GOPATH/bin/terraform-provider-purestorage"
+}
 ```
 
 **Configure the Provider**
