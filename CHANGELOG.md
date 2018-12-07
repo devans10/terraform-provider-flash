@@ -1,3 +1,11 @@
+## Not Released
+## 0.2.0
+
+NOTES:
+
+* Create hostgroups with attached hosts
+
+
 ## 0.1.0 (December 2, 2018)
 
 NOTES:
