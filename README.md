@@ -124,6 +124,7 @@ resource "purestorage_protectiongroup" "testpgroup" {
 	name = "testpgroup"
 	volumes = ["testvol_tf", "testvol_tf_copy"]
 }
+```
 
 Developing the Provider
 ---------------------------
