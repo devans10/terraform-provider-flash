@@ -63,9 +63,13 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"purestorage_volume":    resourcePureVolume(),
-			"purestorage_host":      resourcePureHost(),
-			"purestorage_hostgroup": resourcePureHostgroup(),
+			"purestorage_volume":          resourcePureVolume(),
+			"purestorage_host":            resourcePureHost(),
+			"purestorage_hostgroup":       resourcePureHostgroup(),
+			"purestorage_protectiongroup": resourcePureProtectiongroup(),
+		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"purestorage_flasharray": dataSourcePureFlashArray(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

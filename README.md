@@ -103,6 +103,7 @@ Create a host
 ```
 resource "purestorage_host" "testhosttf" {
 	name = "testhosttf"
+	connected_volumes = ["testvol_tf"]
 }
 ```
 
@@ -110,8 +111,19 @@ Create a hostgroup
 ```
 resource "purestorage_hostgroup" "testhgrouptf" {
 	name = "testhgrouptf" 
+	hosts = ["testhosttf"]
+	connected_volumes = ["testvol_tf_copy"]
 }
 ```
+
+Create a Protection Group
+
+Protection Group has a hosts, hgroups, and volumes parameters, but only 1 can be used.
+```
+resource "purestorage_protectiongroup" "testpgroup" {
+	name = "testpgroup"
+	volumes = ["testvol_tf", "testvol_tf_copy"]
+}
 
 Developing the Provider
 ---------------------------
