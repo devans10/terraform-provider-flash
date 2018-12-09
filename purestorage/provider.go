@@ -1,35 +1,35 @@
 package purestorage
 
 import (
-	"log"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/mitchellh/mapstructure"
 )
 
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"username": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("PURE_USERNAME", ""),
 			},
 
 			"password": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("PURE_PASSWORD", ""),
 			},
 
 			"api_token": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("PURE_APITOKEN", ""),
 			},
 
 			"target": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: false,
-				Required: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("PURE_TARGET", ""),
 			},
 
 			"rest_version": &schema.Schema{
@@ -62,26 +62,30 @@ func Provider() terraform.ResourceProvider {
 				Default:  nil,
 			},
 		},
+
+		DataSourcesMap: map[string]*schema.Resource{
+			"purestorage_flasharray": dataSourcePureFlashArray(),
+		},
+
 		ResourcesMap: map[string]*schema.Resource{
+			"purestorage_flasharray": schema.DataSourceResourceShim(
+				"purestorage_flasharray",
+				dataSourcePureFlashArray(),
+			),
 			"purestorage_volume":          resourcePureVolume(),
 			"purestorage_host":            resourcePureHost(),
 			"purestorage_hostgroup":       resourcePureHostgroup(),
 			"purestorage_protectiongroup": resourcePureProtectiongroup(),
-		},
-		DataSourcesMap: map[string]*schema.Resource{
-			"purestorage_flasharray": dataSourcePureFlashArray(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	var config Config
-	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &config); err != nil {
+	c, err := NewConfig(d)
+	if err != nil {
 		return nil, err
 	}
 
-	log.Println("[INFO] Initializing Pure client")
-	return config.Client()
+	return c.Client()
 }

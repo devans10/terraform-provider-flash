@@ -1,47 +1,76 @@
 package purestorage
 
 import (
+	"fmt"
 	"log"
-	"os"
 
 	"github.com/devans10/go-purestorage/flasharray"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 type Config struct {
-	Username       string            `mapstructure:"username"`
-	Password       string            `mapstructure:"password"`
-	Target         string            `mapstructure:"target"`
-	ApiToken       string            `mapstructure:"api_token"`
-	Rest_version   string            `mapstructure:"rest_version"`
-	Verify_https   bool              `mapstructure:"verify_https"`
-	Ssl_cert       bool              `mapstructure:"ssl_cert"`
-	User_agent     string            `mapsturcture:"user_agent"`
-	Request_kwargs map[string]string `mapstructure:"request_kwargs"`
+	Username       string
+	Password       string
+	Target         string
+	ApiToken       string
+	Rest_version   string
+	Verify_https   bool
+	Ssl_cert       bool
+	User_agent     string
+	Request_kwargs map[string]string
+}
+
+// NewConfig returns a new Config from a supplied ResourceData.
+func NewConfig(d *schema.ResourceData) (*Config, error) {
+
+	// Handle the fact that (username and password) or api_token are
+	// mutually exclusive, but one of the sets is required.
+	username := d.Get("username").(string)
+	password := d.Get("password").(string)
+	apitoken := d.Get("api_token").(string)
+
+	if (username != "") && (password != "") && (apitoken != "") {
+		return nil, fmt.Errorf("Username and Password or API Token must be provided, but not both")
+	}
+
+	if (username != "") && (password == "") {
+		return nil, fmt.Errorf("Password must be provided with Username")
+	}
+
+	request_kwargs := make(map[string]string)
+
+	for key, value := range d.Get("request_kwargs").(map[string]interface{}) {
+		strKey := fmt.Sprintf("%v", key)
+		strValue := fmt.Sprintf("%v", value)
+
+		request_kwargs[strKey] = strValue
+	}
+
+	c := &Config{
+		Username:       username,
+		Password:       password,
+		Target:         d.Get("target").(string),
+		ApiToken:       apitoken,
+		Rest_version:   d.Get("rest_version").(string),
+		Verify_https:   d.Get("verify_https").(bool),
+		Ssl_cert:       d.Get("ssl_cert").(bool),
+		User_agent:     d.Get("user_agent").(string),
+		Request_kwargs: request_kwargs,
+	}
+
+	return c, nil
 }
 
 // Client() returns a new client for accessing flasharray.
 //
 func (c *Config) Client() (*flasharray.Client, error) {
 
-	if v := os.Getenv("PURE_USERNAME"); v != "" {
-		c.Username = v
-	}
-	if v := os.Getenv("PURE_PASSWORD"); v != "" {
-		c.Password = v
-	}
-	if v := os.Getenv("PURE_TARGET"); v != "" {
-		c.Target = v
-	}
-	if v := os.Getenv("PURE_APITOKEN"); v != "" {
-		c.ApiToken = v
-	}
-
 	client, err := flasharray.NewClient(c.Target, c.Username, c.Password, c.ApiToken, c.Rest_version, c.Verify_https, c.Ssl_cert, c.User_agent, c.Request_kwargs)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[INFO] Pure Client configured for target: %s", c.Target)
+	log.Printf("[DEBUG] Pure Client configured for target: %s", c.Target)
 
 	return client, err
 }
