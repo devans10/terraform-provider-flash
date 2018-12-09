@@ -5,7 +5,6 @@ import (
 
 	version "github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl2/hcl"
-	"github.com/hashicorp/terraform/addrs"
 )
 
 // BuildConfig constructs a Config from a root module by loading all of its
@@ -124,7 +123,7 @@ type ModuleRequest struct {
 	// this module. This can be used, for example, to form a lookup key for
 	// each distinct module call in a configuration, allowing for multiple
 	// calls with the same name at different points in the tree.
-	Path addrs.Module
+	Path []string
 
 	// SourceAddr is the source address string provided by the user in
 	// configuration.
@@ -156,24 +155,4 @@ type ModuleRequest struct {
 	// subject of an error diagnostic that relates to the module call itself,
 	// rather than to either its source address or its version number.
 	CallRange hcl.Range
-}
-
-// DisabledModuleWalker is a ModuleWalker that doesn't support
-// child modules at all, and so will return an error if asked to load one.
-//
-// This is provided primarily for testing. There is no good reason to use this
-// in the main application.
-var DisabledModuleWalker ModuleWalker
-
-func init() {
-	DisabledModuleWalker = ModuleWalkerFunc(func(req *ModuleRequest) (*Module, *version.Version, hcl.Diagnostics) {
-		return nil, nil, hcl.Diagnostics{
-			{
-				Severity: hcl.DiagError,
-				Summary:  "Child modules are not supported",
-				Detail:   "Child module calls are not allowed in this context.",
-				Subject:  &req.CallRange,
-			},
-		}
-	})
 }

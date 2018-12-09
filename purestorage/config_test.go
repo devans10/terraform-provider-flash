@@ -30,6 +30,17 @@ func testAccClientGenerateConfig(t *testing.T) *Config {
 	}
 }
 
+func TestAccClient(t *testing.T) {
+	testAccClientPreCheck(t)
+
+	c := testAccClientGenerateConfig(t)
+
+	_, err := c.Client()
+	if err != nil {
+		t.Fatalf("error stting up client: %s", err)
+	}
+}
+
 func TestNewConfigWithApiToken(t *testing.T) {
 	expected := &Config{
 		Username:       "",

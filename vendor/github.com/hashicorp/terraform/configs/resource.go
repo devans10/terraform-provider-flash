@@ -6,13 +6,10 @@ import (
 	"github.com/hashicorp/hcl2/gohcl"
 	"github.com/hashicorp/hcl2/hcl"
 	"github.com/hashicorp/hcl2/hcl/hclsyntax"
-
-	"github.com/hashicorp/terraform/addrs"
 )
 
-// Resource represents a "resource" or "data" block in a module or file.
-type Resource struct {
-	Mode    addrs.ResourceMode
+// ManagedResource represents a "resource" block in a module or file.
+type ManagedResource struct {
 	Name    string
 	Type    string
 	Config  hcl.Body
@@ -23,17 +20,6 @@ type Resource struct {
 
 	DependsOn []hcl.Traversal
 
-	// Managed is populated only for Mode = addrs.ManagedResourceMode,
-	// containing the additional fields that apply to managed resources.
-	// For all other resource modes, this field is nil.
-	Managed *ManagedResource
-
-	DeclRange hcl.Range
-	TypeRange hcl.Range
-}
-
-// ManagedResource represents a "resource" block in a module or file.
-type ManagedResource struct {
 	Connection   *Connection
 	Provisioners []*Provisioner
 
@@ -44,45 +30,21 @@ type ManagedResource struct {
 
 	CreateBeforeDestroySet bool
 	PreventDestroySet      bool
+
+	DeclRange hcl.Range
+	TypeRange hcl.Range
 }
 
-func (r *Resource) moduleUniqueKey() string {
-	return r.Addr().String()
+func (r *ManagedResource) moduleUniqueKey() string {
+	return fmt.Sprintf("%s.%s", r.Name, r.Type)
 }
 
-// Addr returns a resource address for the receiver that is relative to the
-// resource's containing module.
-func (r *Resource) Addr() addrs.Resource {
-	return addrs.Resource{
-		Mode: r.Mode,
-		Type: r.Type,
-		Name: r.Name,
-	}
-}
-
-// ProviderConfigAddr returns the address for the provider configuration
-// that should be used for this resource. This function implements the
-// default behavior of extracting the type from the resource type name if
-// an explicit "provider" argument was not provided.
-func (r *Resource) ProviderConfigAddr() addrs.ProviderConfig {
-	if r.ProviderConfigRef == nil {
-		return r.Addr().DefaultProviderConfig()
-	}
-
-	return addrs.ProviderConfig{
-		Type:  r.ProviderConfigRef.Name,
-		Alias: r.ProviderConfigRef.Alias,
-	}
-}
-
-func decodeResourceBlock(block *hcl.Block) (*Resource, hcl.Diagnostics) {
-	r := &Resource{
-		Mode:      addrs.ManagedResourceMode,
+func decodeResourceBlock(block *hcl.Block) (*ManagedResource, hcl.Diagnostics) {
+	r := &ManagedResource{
 		Type:      block.Labels[0],
 		Name:      block.Labels[1],
 		DeclRange: block.DefRange,
 		TypeRange: block.LabelRanges[0],
-		Managed:   &ManagedResource{},
 	}
 
 	content, remain, diags := block.Body.PartialContent(resourceBlockSchema)
@@ -110,19 +72,12 @@ func decodeResourceBlock(block *hcl.Block) (*Resource, hcl.Diagnostics) {
 	}
 
 	if attr, exists := content.Attributes["for_each"]; exists {
-		r.ForEach = attr.Expr
-		// We currently parse this, but don't yet do anything with it.
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Reserved argument name in resource block",
-			Detail:   fmt.Sprintf("The name %q is reserved for use in a future version of Terraform.", attr.Name),
-			Subject:  &attr.NameRange,
-		})
+		r.Count = attr.Expr
 	}
 
 	if attr, exists := content.Attributes["provider"]; exists {
 		var providerDiags hcl.Diagnostics
-		r.ProviderConfigRef, providerDiags = decodeProviderConfigRef(attr.Expr, "provider")
+		r.ProviderConfigRef, providerDiags = decodeProviderConfigRef(attr)
 		diags = append(diags, providerDiags...)
 	}
 
@@ -152,15 +107,15 @@ func decodeResourceBlock(block *hcl.Block) (*Resource, hcl.Diagnostics) {
 			diags = append(diags, lcDiags...)
 
 			if attr, exists := lcContent.Attributes["create_before_destroy"]; exists {
-				valDiags := gohcl.DecodeExpression(attr.Expr, nil, &r.Managed.CreateBeforeDestroy)
+				valDiags := gohcl.DecodeExpression(attr.Expr, nil, &r.CreateBeforeDestroy)
 				diags = append(diags, valDiags...)
-				r.Managed.CreateBeforeDestroySet = true
+				r.CreateBeforeDestroySet = true
 			}
 
 			if attr, exists := lcContent.Attributes["prevent_destroy"]; exists {
-				valDiags := gohcl.DecodeExpression(attr.Expr, nil, &r.Managed.PreventDestroy)
+				valDiags := gohcl.DecodeExpression(attr.Expr, nil, &r.PreventDestroy)
 				diags = append(diags, valDiags...)
-				r.Managed.PreventDestroySet = true
+				r.PreventDestroySet = true
 			}
 
 			if attr, exists := lcContent.Attributes["ignore_changes"]; exists {
@@ -179,7 +134,7 @@ func decodeResourceBlock(block *hcl.Block) (*Resource, hcl.Diagnostics) {
 
 				switch {
 				case kw == "all":
-					r.Managed.IgnoreAllChanges = true
+					r.IgnoreAllChanges = true
 				default:
 					exprs, listDiags := hcl.ExprList(attr.Expr)
 					diags = append(diags, listDiags...)
@@ -191,12 +146,12 @@ func decodeResourceBlock(block *hcl.Block) (*Resource, hcl.Diagnostics) {
 						// our expr might be the literal string "*", which
 						// we accept as a deprecated way of saying "all".
 						if shimIsIgnoreChangesStar(expr) {
-							r.Managed.IgnoreAllChanges = true
+							r.IgnoreAllChanges = true
 							ignoreAllRange = expr.Range()
 							diags = append(diags, &hcl.Diagnostic{
 								Severity: hcl.DiagWarning,
 								Summary:  "Deprecated ignore_changes wildcard",
-								Detail:   "The [\"*\"] form of ignore_changes wildcard is deprecated. Use \"ignore_changes = all\" to ignore changes to all attributes.",
+								Detail:   "The [\"*\"] form of ignore_changes wildcard is reprecated. Use \"ignore_changes = all\" to ignore changes to all attributes.",
 								Subject:  attr.Expr.Range().Ptr(),
 							})
 							continue
@@ -208,11 +163,11 @@ func decodeResourceBlock(block *hcl.Block) (*Resource, hcl.Diagnostics) {
 						traversal, travDiags := hcl.RelTraversalForExpr(expr)
 						diags = append(diags, travDiags...)
 						if len(traversal) != 0 {
-							r.Managed.IgnoreChanges = append(r.Managed.IgnoreChanges, traversal)
+							r.IgnoreChanges = append(r.IgnoreChanges, traversal)
 						}
 					}
 
-					if r.Managed.IgnoreAllChanges && len(r.Managed.IgnoreChanges) != 0 {
+					if r.IgnoreAllChanges && len(r.IgnoreChanges) != 0 {
 						diags = append(diags, &hcl.Diagnostic{
 							Severity: hcl.DiagError,
 							Summary:  "Invalid ignore_changes ruleset",
@@ -238,36 +193,49 @@ func decodeResourceBlock(block *hcl.Block) (*Resource, hcl.Diagnostics) {
 			}
 			seenConnection = block
 
-			r.Managed.Connection = &Connection{
-				Config:    block.Body,
-				DeclRange: block.DefRange,
-			}
+			conn, connDiags := decodeConnectionBlock(block)
+			diags = append(diags, connDiags...)
+			r.Connection = conn
 
 		case "provisioner":
 			pv, pvDiags := decodeProvisionerBlock(block)
 			diags = append(diags, pvDiags...)
 			if pv != nil {
-				r.Managed.Provisioners = append(r.Managed.Provisioners, pv)
+				r.Provisioners = append(r.Provisioners, pv)
 			}
 
 		default:
-			// Any other block types are ones we've reserved for future use,
-			// so they get a generic message.
-			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Reserved block type name in resource block",
-				Detail:   fmt.Sprintf("The block type name %q is reserved for use by Terraform in a future version.", block.Type),
-				Subject:  &block.TypeRange,
-			})
+			// Should never happen, because the above cases should always be
+			// exhaustive for all the types specified in our schema.
+			continue
 		}
 	}
 
 	return r, diags
 }
 
-func decodeDataBlock(block *hcl.Block) (*Resource, hcl.Diagnostics) {
-	r := &Resource{
-		Mode:      addrs.DataResourceMode,
+// DataResource represents a "data" block in a module or file.
+type DataResource struct {
+	Name    string
+	Type    string
+	Config  hcl.Body
+	Count   hcl.Expression
+	ForEach hcl.Expression
+
+	ProviderConfigRef *ProviderConfigRef
+
+	DependsOn []hcl.Traversal
+
+	DeclRange hcl.Range
+	TypeRange hcl.Range
+}
+
+func (r *DataResource) moduleUniqueKey() string {
+	return fmt.Sprintf("data.%s.%s", r.Name, r.Type)
+}
+
+func decodeDataBlock(block *hcl.Block) (*DataResource, hcl.Diagnostics) {
+	r := &DataResource{
 		Type:      block.Labels[0],
 		Name:      block.Labels[1],
 		DeclRange: block.DefRange,
@@ -299,19 +267,12 @@ func decodeDataBlock(block *hcl.Block) (*Resource, hcl.Diagnostics) {
 	}
 
 	if attr, exists := content.Attributes["for_each"]; exists {
-		r.ForEach = attr.Expr
-		// We currently parse this, but don't yet do anything with it.
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Reserved argument name in module block",
-			Detail:   fmt.Sprintf("The name %q is reserved for use in a future version of Terraform.", attr.Name),
-			Subject:  &attr.NameRange,
-		})
+		r.Count = attr.Expr
 	}
 
 	if attr, exists := content.Attributes["provider"]; exists {
 		var providerDiags hcl.Diagnostics
-		r.ProviderConfigRef, providerDiags = decodeProviderConfigRef(attr.Expr, "provider")
+		r.ProviderConfigRef, providerDiags = decodeProviderConfigRef(attr)
 		diags = append(diags, providerDiags...)
 	}
 
@@ -322,23 +283,17 @@ func decodeDataBlock(block *hcl.Block) (*Resource, hcl.Diagnostics) {
 	}
 
 	for _, block := range content.Blocks {
-		// All of the block types we accept are just reserved for future use, but some get a specialized error message.
-		switch block.Type {
-		case "lifecycle":
-			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Unsupported lifecycle block",
-				Detail:   "Data resources do not have lifecycle settings, so a lifecycle block is not allowed.",
-				Subject:  &block.DefRange,
-			})
-		default:
-			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Reserved block type name in data block",
-				Detail:   fmt.Sprintf("The block type name %q is reserved for use by Terraform in a future version.", block.Type),
-				Subject:  &block.TypeRange,
-			})
-		}
+		// Our schema only allows for "lifecycle" blocks, so we can assume
+		// that this is all we will see here. We don't have any lifecycle
+		// attributes for data resources currently, so we'll just produce
+		// an error.
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Unsupported lifecycle block",
+			Detail:   "Data resources do not have lifecycle settings, so a lifecycle block is not allowed.",
+			Subject:  &block.DefRange,
+		})
+		break
 	}
 
 	return r, diags
@@ -351,11 +306,10 @@ type ProviderConfigRef struct {
 	AliasRange *hcl.Range // nil if alias not set
 }
 
-func decodeProviderConfigRef(expr hcl.Expression, argName string) (*ProviderConfigRef, hcl.Diagnostics) {
+func decodeProviderConfigRef(attr *hcl.Attribute) (*ProviderConfigRef, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
-	var shimDiags hcl.Diagnostics
-	expr, shimDiags = shimTraversalInString(expr, false)
+	expr, shimDiags := shimTraversalInString(attr.Expr, false)
 	diags = append(diags, shimDiags...)
 
 	traversal, travDiags := hcl.AbsTraversalForExpr(expr)
@@ -367,13 +321,13 @@ func decodeProviderConfigRef(expr hcl.Expression, argName string) (*ProviderConf
 		diags = append(diags, travDiags...)
 	}
 
-	if len(traversal) < 1 || len(traversal) > 2 {
+	if len(traversal) < 1 && len(traversal) > 2 {
 		// A provider reference was given as a string literal in the legacy
 		// configuration language and there are lots of examples out there
 		// showing that usage, so we'll sniff for that situation here and
 		// produce a specialized error message for it to help users find
 		// the new correct form.
-		if exprIsNativeQuotedString(expr) {
+		if exprIsNativeQuotedString(attr.Expr) {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Invalid provider configuration reference",
@@ -386,7 +340,7 @@ func decodeProviderConfigRef(expr hcl.Expression, argName string) (*ProviderConf
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid provider configuration reference",
-			Detail:   fmt.Sprintf("The %s argument requires a provider type name, optionally followed by a period and then a configuration alias.", argName),
+			Detail:   fmt.Sprintf("The %s argument requires a provider type name, optionally followed by a period and then a configuration alias.", attr.Name),
 			Subject:  expr.Range().Ptr(),
 		})
 		return nil, diags
@@ -416,28 +370,6 @@ func decodeProviderConfigRef(expr hcl.Expression, argName string) (*ProviderConf
 	return ret, diags
 }
 
-// Addr returns the provider config address corresponding to the receiving
-// config reference.
-//
-// This is a trivial conversion, essentially just discarding the source
-// location information and keeping just the addressing information.
-func (r *ProviderConfigRef) Addr() addrs.ProviderConfig {
-	return addrs.ProviderConfig{
-		Type:  r.Name,
-		Alias: r.Alias,
-	}
-}
-
-func (r *ProviderConfigRef) String() string {
-	if r == nil {
-		return "<nil>"
-	}
-	if r.Alias != "" {
-		return fmt.Sprintf("%s.%s", r.Name, r.Alias)
-	}
-	return r.Name
-}
-
 var commonResourceAttributes = []hcl.AttributeSchema{
 	{
 		Name: "count",
@@ -456,18 +388,25 @@ var commonResourceAttributes = []hcl.AttributeSchema{
 var resourceBlockSchema = &hcl.BodySchema{
 	Attributes: commonResourceAttributes,
 	Blocks: []hcl.BlockHeaderSchema{
-		{Type: "locals"}, // reserved for future use
-		{Type: "lifecycle"},
-		{Type: "connection"},
-		{Type: "provisioner", LabelNames: []string{"type"}},
+		{
+			Type: "lifecycle",
+		},
+		{
+			Type: "connection",
+		},
+		{
+			Type:       "provisioner",
+			LabelNames: []string{"type"},
+		},
 	},
 }
 
 var dataBlockSchema = &hcl.BodySchema{
 	Attributes: commonResourceAttributes,
 	Blocks: []hcl.BlockHeaderSchema{
-		{Type: "lifecycle"}, // reserved for future use
-		{Type: "locals"},    // reserved for future use
+		{
+			Type: "lifecycle",
+		},
 	},
 }
 

@@ -4,15 +4,7 @@ import (
 	"github.com/hashicorp/hcl2/hcl"
 )
 
-// MergeBodies creates a new HCL body that contains a combination of the
-// given base and override bodies. Attributes and blocks defined in the
-// override body take precedence over those of the same name defined in
-// the base body.
-//
-// If any block of a particular type appears in "override" then it will
-// replace _all_ of the blocks of the same type in "base" in the new
-// body.
-func MergeBodies(base, override hcl.Body) hcl.Body {
+func mergeBodies(base, override hcl.Body) hcl.Body {
 	return mergeBody{
 		Base:     base,
 		Override: override,
@@ -63,7 +55,7 @@ func (b mergeBody) PartialContent(schema *hcl.BodySchema) (*hcl.BodyContent, hcl
 
 	content := b.prepareContent(baseContent, overrideContent)
 
-	remain := MergeBodies(baseRemain, overrideRemain)
+	remain := mergeBodies(baseRemain, overrideRemain)
 
 	return content, remain, diags
 }
