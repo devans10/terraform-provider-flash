@@ -17,13 +17,6 @@ Requirements
 
 Usage
 ---------------------
-
-**provider.purestorage: new or changed plugin executable**
-
-```
-export TF_SKIP_PROVIDER_VERIFY=1
-```
-
 Add the following to `$HOME/.terraformrc`
 
 ```
@@ -56,7 +49,7 @@ provider "purestorage" {
 
 ***Configure in environment***
 
-Set username(`PURESTORAGE_USERNAME`) and password(`PURESTORAGE_PASSWORD`) and endpoint(`PURESTORAGE_TARGET`) in environment
+Set username(`PURESTORAGE_USERNAME`) and password(`PURESTORAGE_PASSWORD`) or API Token(`PURESTORAGE_APITOKEN`) and endpoint(`PURESTORAGE_TARGET`) in environment.
 ```
 provider "purestorage" {}
 ```
