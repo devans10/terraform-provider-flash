@@ -14,7 +14,7 @@ const testAccCheckPureVolumeResourceName = "purestorage_volume.tfvolumetest"
 const testAccCheckPureVolumeConfig = `
 resource "purestorage_volume" "tfvolumetest" {
 	name = "tfvolumetest"
-	size = "1G"
+	size = 1024000000
 }
 `
 
