@@ -18,7 +18,7 @@ func resourcePureVolume() *schema.Resource {
 				Required: true,
 			},
 			"size": &schema.Schema{
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 			},
@@ -52,12 +52,12 @@ func resourcePureVolumeCreate(d *schema.ResourceData, m interface{}) error {
 	s, _ := d.GetOk("source")
 	if s.(string) == "" {
 		z, _ := d.GetOk("size")
-		v, err = client.Volumes.CreateVolume(n.(string), z.(string), nil)
+		v, err = client.Volumes.CreateVolume(n.(string), z.(int), nil)
 		if err != nil {
 			return err
 		}
 	} else {
-		v, err = client.Volumes.CopyVolume(n.(string), s.(string), nil)
+		v, err = client.Volumes.CopyVolume(n.(string), s.(string), false, nil)
 		if err != nil {
 			return err
 		}
@@ -100,6 +100,22 @@ func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 	n, _ := d.GetOk("name")
 	if n.(string) != oldVol.Name {
 		v, err = client.Volumes.RenameVolume(d.Id(), n.(string), nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	s, _ := d.GetOk("source")
+	if s.(string) != oldVol.Source {
+		v, err = client.Volumes.CopyVolume(d.Id(), s.(string), true, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	z, _ := d.GetOk("size")
+	if z.(int) > oldVol.Size {
+		v, err = client.Volumes.ExtendVolume(d.Id(), z.(int), nil)
 		if err != nil {
 			return err
 		}

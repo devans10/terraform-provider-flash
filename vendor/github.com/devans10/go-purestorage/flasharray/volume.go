@@ -33,9 +33,9 @@ func (v *VolumeService) SetVolume(name string, params map[string]string, data in
 }
 
 // CreateSnapshot function creates a volume snapshot of the volume passed in the argument.
-func (v *VolumeService) CreateSnapshot(volume string, params map[string]string) (*Volume, error) {
+func (v *VolumeService) CreateSnapshot(volume string, suffix string, params map[string]string) (*Volume, error) {
 	volumes := []string{volume}
-	m, err := v.CreateSnapshots(volumes, nil)
+	m, err := v.CreateSnapshots(volumes, suffix, params)
 	if err != nil {
 		return nil, err
 	}
@@ -45,15 +45,17 @@ func (v *VolumeService) CreateSnapshot(volume string, params map[string]string) 
 
 // CreateSnapshosts function will create a snapshot of all the volumes passed in the volumes slice.
 // an array of volume objects is returned.
-func (v *VolumeService) CreateSnapshots(volumes []string, params map[string]string) ([]Volume, error) {
+func (v *VolumeService) CreateSnapshots(volumes []string, suffix string, params map[string]string) ([]Volume, error) {
 	type data struct {
-		Snap   bool     `json:"snap"`
-		Source []string `json:"source"`
+		Snap   bool     `json:"snap,omitempty"`
+		Suffix string   `json:"suffix,omitempty"`
+		Source []string `json:"source,omitepty"`
 	}
 
 	d := &data{}
 	d.Snap = true
 	d.Source = volumes
+	d.Suffix = suffix
 	req, err := v.client.NewRequest("POST", "volume", params, d)
 	if err != nil {
 		return nil, err
@@ -81,10 +83,10 @@ func (v *VolumeService) CreateSnapshots(volumes []string, params map[string]stri
 //        T      Terabyte (2^40)
 //        P      Petabyte (2^50)
 //        ====== ======== ======
-func (v *VolumeService) CreateVolume(name string, size string, params map[string]string) (*Volume, error) {
+func (v *VolumeService) CreateVolume(name string, size int, params map[string]string) (*Volume, error) {
 
 	path := fmt.Sprintf("volume/%s", name)
-	data := map[string]string{"size": size}
+	data := map[string]int{"size": size}
 	req, err := v.client.NewRequest("POST", path, params, data)
 	if err != nil {
 		return nil, err
@@ -123,10 +125,10 @@ func (v *VolumeService) CreateConglomerateVolume(name string, params map[string]
 }
 
 // Clone a volume and return a dictionary describing the new volume.
-func (v *VolumeService) CopyVolume(dest string, source string, params map[string]string) (*Volume, error) {
+func (v *VolumeService) CopyVolume(dest string, source string, overwrite bool, params map[string]string) (*Volume, error) {
 
 	path := fmt.Sprintf("volume/%s", dest)
-	data := map[string]string{"source": source}
+	data := map[string]interface{}{"source": source, "overwrite": overwrite}
 	req, err := v.client.NewRequest("POST", path, params, data)
 	if err != nil {
 		return nil, err
@@ -164,7 +166,7 @@ func (v *VolumeService) EradicateVolume(name string, params map[string]string) (
 
 	path := fmt.Sprintf("volume/%s", name)
 	data := map[string]bool{"eradicate": true}
-	req, err := v.client.NewRequest("POST", path, params, data)
+	req, err := v.client.NewRequest("DELETE", path, params, data)
 	if err != nil {
 		return nil, err
 	}
@@ -179,11 +181,11 @@ func (v *VolumeService) EradicateVolume(name string, params map[string]string) (
 }
 
 // Extend the size of the volume
-func (v *VolumeService) ExtendVolume(name string, size string, params map[string]string) (*Volume, error) {
+func (v *VolumeService) ExtendVolume(name string, size int, params map[string]string) (*Volume, error) {
 
 	type data struct {
-		Truncate bool   `json:"truncate"`
-		Size     string `json:"size"`
+		Truncate bool `json:"truncate"`
+		Size     int  `json:"size"`
 	}
 	d := &data{}
 	d.Size = size
@@ -295,11 +297,11 @@ func (v *VolumeService) RecoverVolume(volume string, params map[string]string) (
 // Decrese the size of a volume
 // WARNING!!
 // Potential data loss
-func (v *VolumeService) TruncateVolume(name string, size string, params map[string]string) (*Volume, error) {
+func (v *VolumeService) TruncateVolume(name string, size int, params map[string]string) (*Volume, error) {
 
 	type data struct {
-		Truncate bool   `json:"truncate"`
-		Size     string `json:"size"`
+		Truncate bool `json:"truncate"`
+		Size     int  `json:"size"`
 	}
 	d := &data{}
 	d.Size = size

@@ -17,7 +17,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -30,21 +29,21 @@ var supported_rest_versions = [...]string{"1.0", "1.1", "1.2", "1.3", "1.4", "1.
 
 // Type Client represents a Pure Storage FlashArray and exposes administrative APIs.
 type Client struct {
-	Target		string
-	Username	string
-	Password	string
-	Api_token	string
-	Rest_version	string
-	User_agent	string
-	Request_kwargs	map[string]string
+	Target         string
+	Username       string
+	Password       string
+	Api_token      string
+	Rest_version   string
+	User_agent     string
+	Request_kwargs map[string]string
 
-	client		*http.Client
+	client *http.Client
 
-	Array		*ArrayService
-	Volumes		*VolumeService
-        Hosts           *HostService
-        Hostgroups      *HostgroupService
-	Offloads	*OffloadService
+	Array            *ArrayService
+	Volumes          *VolumeService
+	Hosts            *HostService
+	Hostgroups       *HostgroupService
+	Offloads         *OffloadService
 	Protectiongroups *ProtectiongroupService
 	Vgroups          *VgroupService
 	Networks         *NetworkService
@@ -99,10 +98,10 @@ type auth struct {
 // request_kwargs
 // A map of keyword arguments that we will pass into the the call.
 func NewClient(target string, username string, password string, api_token string,
-               rest_version string, verify_https bool, ssl_cert bool,
-               user_agent string, request_kwargs map[string]string) (*Client, error) {
+	rest_version string, verify_https bool, ssl_cert bool,
+	user_agent string, request_kwargs map[string]string) (*Client, error) {
 
-	log.Printf("[DEBUG] flasharray.NewClient: checking auth paramters")
+	//log.Printf("[DEBUG] flasharray.NewClient: checking auth paramters")
 	if api_token == "" && (username == "" && password == "") {
 		err := errors.New("[ERROR] Must specify API token or both username and password.")
 		return nil, err
@@ -113,7 +112,7 @@ func NewClient(target string, username string, password string, api_token string
 		return nil, err
 	}
 
-	log.Printf("[DEBUG] flasharray.NewClient: checking request_kwargs")
+	//log.Printf("[DEBUG] flasharray.NewClient: checking request_kwargs")
 	if request_kwargs == nil {
 		request_kwargs = make(map[string]string)
 	}
@@ -127,7 +126,7 @@ func NewClient(target string, username string, password string, api_token string
 		}
 	}
 
-	log.Printf("[DEBUG] flasharray.NewClient: checking rest_version")
+	//log.Printf("[DEBUG] flasharray.NewClient: checking rest_version")
 	if rest_version != "" {
 		err := checkRestVersion(rest_version, target)
 		if err != nil {
@@ -141,9 +140,9 @@ func NewClient(target string, username string, password string, api_token string
 		rest_version = r
 	}
 
-	log.Printf("[DEBUG] flasharray.NewClient: Rest Vesrion: %s", rest_version)
+	//log.Printf("[DEBUG] flasharray.NewClient: Rest Vesrion: %s", rest_version)
 
-	log.Printf("[DEBUG] flasharray.NewClient: creating client")
+	//log.Printf("[DEBUG] flasharray.NewClient: creating client")
 	cookieJar, _ := cookiejar.New(nil)
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -151,7 +150,7 @@ func NewClient(target string, username string, password string, api_token string
 	c := &Client{Target: target, Username: username, Password: password, Api_token: api_token, Rest_version: rest_version, Request_kwargs: request_kwargs}
 	c.client = &http.Client{Transport: tr, Jar: cookieJar}
 
-	log.Printf("[DEBUG] flasharray.NewClient: Authenticating REST session")
+	//log.Printf("[DEBUG] flasharray.NewClient: Authenticating REST session")
 	if api_token == "" {
 		c.getApiToken()
 	}
@@ -163,7 +162,7 @@ func NewClient(target string, username string, password string, api_token string
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("[DEBUG] flasharray.NewClient: REST session created.")
+	//log.Printf("[DEBUG] flasharray.NewClient: REST session created.")
 
 	c.Array = &ArrayService{client: c}
 	c.Volumes = &VolumeService{client: c}
@@ -212,7 +211,7 @@ func (c *Client) NewRequest(method string, path string, params map[string]string
 	if params != nil {
 		ps := url.Values{}
 		for k, v := range params {
-			log.Printf("[DEBUG] key: %s, value: %s \n", v, k)
+			//log.Printf("[DEBUG] key: %s, value: %s \n", v, k)
 			ps.Set(k, v)
 		}
 		baseUrl.RawQuery = ps.Encode()
@@ -223,7 +222,6 @@ func (c *Client) NewRequest(method string, path string, params map[string]string
 	}
 	if data != nil {
 		jsonString, err := json.Marshal(data)
-		fmt.Println(bytes.NewBuffer(jsonString))
 		if err != nil {
 			return nil, err
 		}

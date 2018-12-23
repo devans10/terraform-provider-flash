@@ -18,12 +18,18 @@ func resourcePureHost() *schema.Resource {
 				Required: true,
 			},
 			"iqn": &schema.Schema{
-				Type:     schema.TypeString,
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 				Required: false,
 				Optional: true,
 			},
 			"wwn": &schema.Schema{
-				Type:     schema.TypeString,
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 				Required: false,
 				Optional: true,
 			},
@@ -47,7 +53,21 @@ func resourcePureHostCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*flasharray.Client)
 
 	v, _ := d.GetOk("name")
-	h, err := client.Hosts.CreateHost(v.(string), nil)
+	var wwnlist []string
+	if wl, ok := d.GetOk("wwn"); ok {
+		for _, element := range wl.([]interface{}) {
+			wwnlist = append(wwnlist, element.(string))
+		}
+	}
+	var iqnlist []string
+	if il, ok := d.GetOk("iqn"); ok {
+		for _, element := range il.([]interface{}) {
+			iqnlist = append(iqnlist, element.(string))
+		}
+	}
+
+	data := map[string][]string{"wwnlist": wwnlist, "iqnlist": iqnlist}
+	h, err := client.Hosts.CreateHost(v.(string), nil, data)
 	if err != nil {
 		return err
 	}
@@ -91,17 +111,78 @@ func resourcePureHostRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("name", host.Name)
 	d.Set("iqn", host.Iqn)
 	d.Set("wwn", host.Wwn)
-	d.Set("connected_volunmes", connected_volumes)
+	d.Set("connected_volumes", connected_volumes)
 	return nil
 }
 
 func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*flasharray.Client)
+	var h *flasharray.Host
+	var err error
 
-	v, _ := d.GetOk("name")
-	h, err := client.Hosts.RenameHost(d.Id(), v.(string), nil)
-	if err != nil {
-		return err
+	oldHost, _ := client.Hosts.GetHost(d.Id(), nil)
+
+	n, _ := d.GetOk("name")
+	if n.(string) != oldHost.Name {
+		h, err = client.Hosts.RenameHost(d.Id(), n.(string), nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	var wwnlist []string
+	wl, _ := d.GetOk("wwn")
+	for _, element := range wl.([]interface{}) {
+		wwnlist = append(wwnlist, element.(string))
+	}
+	if !sameStringSlice(wwnlist, oldHost.Wwn) {
+		data := map[string]interface{}{"wwnlist": wwnlist}
+		h, err = client.Hosts.SetHost(d.Id(), nil, data)
+		if err != nil {
+			return err
+		}
+	}
+
+	var iqnlist []string
+	il, _ := d.GetOk("iqn")
+	for _, element := range il.([]interface{}) {
+		iqnlist = append(iqnlist, element.(string))
+	}
+	if !sameStringSlice(iqnlist, oldHost.Iqn) {
+		data := map[string]interface{}{"iqnlist": iqnlist}
+		h, err = client.Hosts.SetHost(d.Id(), nil, data)
+		if err != nil {
+			return err
+		}
+	}
+
+	var connected_volumes []string
+	cv, _ := d.GetOk("connected_volumes")
+	for _, element := range cv.([]interface{}) {
+		connected_volumes = append(connected_volumes, element.(string))
+	}
+	var current_volumes []string
+	curvols, _ := client.Hosts.ListHostConnections(d.Id(), nil)
+	for _, volume := range curvols {
+		current_volumes = append(current_volumes, volume.Vol)
+	}
+
+	if !sameStringSlice(connected_volumes, current_volumes) {
+		connect_volumes := difference(connected_volumes, current_volumes)
+		for _, volume := range connect_volumes {
+			_, err = client.Hosts.ConnectHost(d.Id(), volume, nil)
+			if err != nil {
+				return err
+			}
+		}
+
+		disconnect_volumes := difference(current_volumes, connected_volumes)
+		for _, volume := range disconnect_volumes {
+			_, err = client.Hosts.DisconnectHost(d.Id(), volume, nil)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	d.SetId(h.Name)
