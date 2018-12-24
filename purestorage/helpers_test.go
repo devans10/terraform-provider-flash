@@ -32,3 +32,10 @@ func Test_sameStringSlice_false(t *testing.T) {
 		t.Fatal("Returned true")
 	}
 }
+
+func Test_stringInSlice(t *testing.T) {
+	slice1 := []string{"One", "Two", "Three", "foo"}
+	if !stringInSlice("foo", slice1) {
+		t.Fatal("Returned false")
+	}
+}

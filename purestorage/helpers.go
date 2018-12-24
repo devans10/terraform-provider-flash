@@ -46,3 +46,13 @@ func sameStringSlice(x, y []string) bool {
 	}
 	return false
 }
+
+// Function to check if a string exists in a slice
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}

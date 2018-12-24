@@ -58,13 +58,13 @@ func resourcePureProtectiongroup() *schema.Resource {
 			"source": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  nil,
+				Computed: true,
 			},
 			"all_for": &schema.Schema{
 				Type:        schema.TypeInt,
 				Description: "Modifies the retention policy of the protection group. Specifies the length of time to keep the snapshots on the source array before they are eradicated.",
 				Optional:    true,
-				Default:     nil,
+				Default:     86400,
 			},
 			"allowed": &schema.Schema{
 				Type:        schema.TypeBool,
@@ -76,13 +76,13 @@ func resourcePureProtectiongroup() *schema.Resource {
 				Type:        schema.TypeInt,
 				Description: "Modifies the retention policy of the protection group. Specifies the number of days to keep the per_day snapshots beyond the all_for period before they are eradicated.",
 				Optional:    true,
-				Default:     nil,
+				Default:     7,
 			},
 			"per_day": &schema.Schema{
 				Type:        schema.TypeInt,
 				Description: "Modifies the retention policy of the protection group. Specifies the number of per_day snapshots to keep beyond the all_for period.",
 				Optional:    true,
-				Default:     nil,
+				Default:     4,
 			},
 			"replicate_at": &schema.Schema{
 				Type:        schema.TypeInt,
@@ -91,24 +91,10 @@ func resourcePureProtectiongroup() *schema.Resource {
 				Default:     nil,
 			},
 			"replicate_blackout": &schema.Schema{
-				Type:        schema.TypeSet,
+				Type:        schema.TypeMap,
 				Description: "Modifies the replication schedule of the protection group. Specifies the range of time at which to suspend replication.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"end": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  nil,
-						},
-						"start": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  nil,
-						},
-					},
-				},
-				Optional: true,
-				Default:  nil,
+				Optional:    true,
+				Default:     nil,
 			},
 			"replicate_enabled": &schema.Schema{
 				Type:        schema.TypeBool,
@@ -120,7 +106,7 @@ func resourcePureProtectiongroup() *schema.Resource {
 				Type:        schema.TypeInt,
 				Description: "Modifies the replication schedule of the protection group. Specifies the replication frequency.",
 				Optional:    true,
-				Default:     nil,
+				Default:     14400,
 			},
 			"snap_at": &schema.Schema{
 				Type:        schema.TypeInt,
@@ -138,25 +124,25 @@ func resourcePureProtectiongroup() *schema.Resource {
 				Type:        schema.TypeInt,
 				Description: "Modifies the snapshot schedule of the protection group. Specifies the snapshot frequency.",
 				Optional:    true,
-				Default:     nil,
+				Default:     3600,
 			},
 			"target_all_for": &schema.Schema{
 				Type:        schema.TypeInt,
 				Description: "Modifies the retention policy of the protection group. Specifies the length of time to keep the replicated snapshots on the targets.",
 				Optional:    true,
-				Default:     nil,
+				Default:     86400,
 			},
 			"target_days": &schema.Schema{
 				Type:        schema.TypeInt,
 				Description: "Modifies the retention policy of the protection group. Specifies the number of days to keep the target_per_day replicated snapshots beyond the target_all_for period before they are eradicated.",
 				Optional:    true,
-				Default:     nil,
+				Default:     7,
 			},
 			"target_per_day": &schema.Schema{
 				Type:        schema.TypeInt,
 				Description: "Modifies the retention policy of the protection group. Specifies the number of per_day replicated snapshots to keep beyond the target_all_for period.",
 				Optional:    true,
-				Default:     nil,
+				Default:     4,
 			},
 		},
 	}
@@ -194,7 +180,7 @@ func resourcePureProtectiongroupCreate(d *schema.ResourceData, m interface{}) er
 		}
 	}
 
-	data := map[string][]string{"hostlist": hosts, "vollist": volumes, "hgrouplist": hgroups, "targets": targets}
+	data := map[string][]string{"hostlist": hosts, "vollist": volumes, "hgrouplist": hgroups, "targetlist": targets}
 	pgroup, err := client.Protectiongroups.CreateProtectiongroup(p.(string), data, nil)
 	if err != nil {
 		return err
