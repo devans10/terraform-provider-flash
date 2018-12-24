@@ -11,6 +11,9 @@ func resourcePureHostgroup() *schema.Resource {
 		Read:   resourcePureHostgroupRead,
 		Update: resourcePureHostgroupUpdate,
 		Delete: resourcePureHostgroupDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourcePureHostgroupImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -115,6 +118,36 @@ func resourcePureHostgroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	var connected_volumes []string
+	cv, _ := d.GetOk("connected_volumes")
+	for _, element := range cv.([]interface{}) {
+		connected_volumes = append(connected_volumes, element.(string))
+	}
+	var current_volumes []string
+	curvols, _ := client.Hostgroups.ListHostgroupConnections(d.Id(), nil)
+	for _, volume := range curvols {
+		current_volumes = append(current_volumes, volume.Vol)
+	}
+
+	if !sameStringSlice(connected_volumes, current_volumes) {
+		connect_volumes := difference(connected_volumes, current_volumes)
+		for _, volume := range connect_volumes {
+			_, err = client.Hostgroups.ConnectHostgroup(d.Id(), volume, nil)
+			if err != nil {
+				return err
+			}
+		}
+
+		disconnect_volumes := difference(current_volumes, connected_volumes)
+		for _, volume := range disconnect_volumes {
+			_, err = client.Hostgroups.DisconnectHostgroup(d.Id(), volume, nil)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	d.SetId(h.Name)
 	return resourcePureHostgroupRead(d, m)
 }
@@ -144,4 +177,25 @@ func resourcePureHostgroupDelete(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId("")
 	return nil
+}
+
+func resourcePureHostgroupImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	client := m.(*flasharray.Client)
+
+	h, err := client.Hostgroups.GetHostgroup(d.Id(), nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var connected_volumes []string
+	cv, _ := client.Hostgroups.ListHostgroupConnections(h.Name, nil)
+	for _, volume := range cv {
+		connected_volumes = append(connected_volumes, volume.Vol)
+	}
+
+	d.Set("name", h.Name)
+	d.Set("hosts", h.Hosts)
+	d.Set("connected_volumes", connected_volumes)
+	return []*schema.ResourceData{d}, nil
 }

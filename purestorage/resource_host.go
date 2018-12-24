@@ -11,7 +11,9 @@ func resourcePureHost() *schema.Resource {
 		Read:   resourcePureHostRead,
 		Update: resourcePureHostUpdate,
 		Delete: resourcePureHostDelete,
-
+		Importer: &schema.ResourceImporter{
+			State: resourcePureHostImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
@@ -215,4 +217,26 @@ func resourcePureHostDelete(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId("")
 	return nil
+}
+
+func resourcePureHostImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	client := m.(*flasharray.Client)
+
+	host, err := client.Hosts.GetHost(d.Id(), nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var connected_volumes []string
+	cv, _ := client.Hosts.ListHostConnections(host.Name, nil)
+	for _, volume := range cv {
+		connected_volumes = append(connected_volumes, volume.Vol)
+	}
+
+	d.Set("name", host.Name)
+	d.Set("iqn", host.Iqn)
+	d.Set("wwn", host.Wwn)
+	d.Set("connected_volumes", connected_volumes)
+	return []*schema.ResourceData{d}, nil
 }

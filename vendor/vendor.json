@@ -255,10 +255,10 @@
 			"revisionTime": "2018-08-30T19:11:22Z"
 		},
 		{
-			"checksumSHA1": "yuNW/gCk8pAIfQ5ASq57PRBz61c=",
+			"checksumSHA1": "6DOcaYeWLjhzPDYy20OXn7LqOOQ=",
 			"path": "github.com/devans10/go-purestorage/flasharray",
-			"revision": "0817ab8fac86244d1d01790e996e79a13ba66745",
-			"revisionTime": "2018-12-22T19:54:46Z"
+			"revision": "2df10f24726a50284138d65a290b48e69c95c5cb",
+			"revisionTime": "2018-12-23T15:51:12Z"
 		},
 		{
 			"checksumSHA1": "PvxFk8o4Lr9oqxkdJmuEfh4gaS0=",

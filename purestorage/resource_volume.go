@@ -11,7 +11,9 @@ func resourcePureVolume() *schema.Resource {
 		Read:   resourcePureVolumeRead,
 		Update: resourcePureVolumeUpdate,
 		Delete: resourcePureVolumeDelete,
-
+		Importer: &schema.ResourceImporter{
+			State: resourcePureVolumeImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
@@ -135,4 +137,21 @@ func resourcePureVolumeDelete(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId("")
 	return nil
+}
+
+func resourcePureVolumeImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	client := m.(*flasharray.Client)
+
+	vol, err := client.Volumes.GetVolume(d.Id(), nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	d.Set("name", vol.Name)
+	d.Set("size", vol.Size)
+	d.Set("serial", vol.Serial)
+	d.Set("created", vol.Created)
+	d.Set("source", vol.Source)
+	return []*schema.ResourceData{d}, nil
 }
