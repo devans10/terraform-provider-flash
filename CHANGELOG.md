@@ -6,6 +6,8 @@ NOTES:
 * Create hostgroups with attached hosts
 * Attach volumes to hostgroups using connected_volumes parameter
 * Added protection group resource
+* Added Importers to all resources
+* Added ability to update all resource parameters
 
 
 ## 0.1.0 (December 2, 2018)

@@ -1,6 +1,9 @@
 package purestorage
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/devans10/go-purestorage/flasharray"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -95,11 +98,11 @@ func resourcePureVolumeRead(d *schema.ResourceData, m interface{}) error {
 
 // resourcePureVolumeUpdate will update the attributes of the volume.
 //
-// If a new source is provided, a snapshot of the current volume will be 
+// If a new source is provided, a snapshot of the current volume will be
 // taken before the source volume is copied over the current volume. This
 // should help protect from any accidental overwrites.
 //
-// If a new size is provided, it must be larger than the current size.  Only 
+// If a new size is provided, it must be larger than the current size.  Only
 // extending volumes is supported at this time, since truncating volumes can
 // lead to data loss.
 func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
@@ -124,10 +127,11 @@ func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 
 	s, _ := d.GetOk("source")
 	if s.(string) != oldVol.Source {
-		_, err = client.Volumes.CreateSnapshot(d.Id(), nil)
+		snapshot, err := client.Volumes.CreateSnapshot(d.Id(), "", nil)
 		if err != nil {
 			return err
 		}
+		log.Printf("[INFO] Created volume snapshot %s before overwriting volume %s.", snapshot.Name, d.Id())
 		v, err = client.Volumes.CopyVolume(d.Id(), s.(string), true, nil)
 		if err != nil {
 			return err
@@ -150,7 +154,7 @@ func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 // resourcePureVolumeDelete will delete the volume specified.
-// The volume will NOT be eradicated. This is to reduce the chance of 
+// The volume will NOT be eradicated. This is to reduce the chance of
 // data loss.  The volume's timer will start for 24 hours, at that time
 // the volume will be eradicated.
 func resourcePureVolumeDelete(d *schema.ResourceData, m interface{}) error {

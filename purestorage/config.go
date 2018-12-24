@@ -10,7 +10,7 @@ import (
 
 // Config is the configuration for the Purestorage FlashArray Go Client.
 // It holds the connection information to connect to the array API.
-// Either the Username and Password or the API Token should be provided, 
+// Either the Username and Password or the API Token should be provided,
 // but not both.
 type Config struct {
 	Username       string
