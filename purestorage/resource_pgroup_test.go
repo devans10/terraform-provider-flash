@@ -2,6 +2,7 @@ package purestorage
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"github.com/devans10/go-purestorage/flasharray"
@@ -11,25 +12,9 @@ import (
 
 const testAccCheckPureProtectiongroupResourceName = "purestorage_protectiongroup.tfprotectiongrouptest"
 
-const testAccCheckPureProtectiongroupConfig = `
-resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
-	name = "tfprotectiongrouptest"
-}
-`
-
-const testAccCheckPureProtectiongroupConfigWithHostlist = `
-resource "purestorage_host" "tfhosttest" {
-	name = "tfhosttest"
-}
-
-resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
-        name = "tfprotectiongrouptest"
-	hostlist = ["${purestorage_host.tfhostest.name}"]
-}
-`
-
 // Create a protectiongroup
 func TestAccResourcePureProtectiongroup_createProtectiongroup(t *testing.T) {
+	rInt := rand.Int()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -37,7 +22,7 @@ func TestAccResourcePureProtectiongroup_createProtectiongroup(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig,
+				Config: testAccCheckPureProtectiongroupConfig(rInt),
 				Check:  resource.ComposeTestCheckFunc(testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true)),
 			},
 		},
@@ -84,4 +69,23 @@ func testAccCheckPureProtectiongroupExists(n string, exists bool) resource.TestC
 		}
 		return nil
 	}
+}
+
+func testAccCheckPureProtectiongroupConfig(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
+        name = "tfprotectiongrouptest-%d"
+}`, rInt)
+}
+
+func testAccCheckPureProtectiongroupConfigWithHostlist(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_host" "tfhosttest" {
+        name = "tfhosttest%d"
+}
+
+resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
+        name = "tfprotectiongrouptest-%d"
+        hostlist = ["${purestorage_host.tfhostest.name}"]
+}`, rInt, rInt)
 }

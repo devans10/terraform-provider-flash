@@ -2,6 +2,7 @@ package purestorage
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"github.com/devans10/go-purestorage/flasharray"
@@ -10,20 +11,13 @@ import (
 )
 
 const testAccCheckPureVolumeResourceName = "purestorage_volume.tfvolumetest"
-
-const testAccCheckPureVolumeConfig = `
-resource "purestorage_volume" "tfvolumetest" {
-	name = "tfvolumetest"
-	size = 1024000000
-}
-`
+const testAccCheckPureVolumeCloneResourceName = "purestorage_volume.tfclonevolumetest"
 
 // The volumes created in theses tests will not be eradicated.
-// So to run these tests multiple times within 24 hours, the
-// tests volumes will have to be eradicated manually.
 //
 // Create a volume
-func TestAccResourcePureVolume_createVolume(t *testing.T) {
+func TestAccResourcePureVolume_create(t *testing.T) {
+	rInt := rand.Int()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -31,8 +25,79 @@ func TestAccResourcePureVolume_createVolume(t *testing.T) {
 		CheckDestroy: testAccCheckPureVolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureVolumeConfig,
-				Check:  resource.ComposeTestCheckFunc(testAccCheckPureVolumeExists(testAccCheckPureVolumeResourceName, true)),
+				Config: testAccCheckPureVolumeConfig(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureVolumeExists(testAccCheckPureVolumeResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "name", fmt.Sprintf("tfvolumetest-%d", rInt)),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "size", "1024000000"),
+					resource.TestCheckResourceAttrSet(testAccCheckPureVolumeResourceName, "serial"),
+				),
+			},
+		},
+	})
+}
+func TestAccResourcePureVolume_clone(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureVolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureVolumeConfig(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureVolumeExists(testAccCheckPureVolumeResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "name", fmt.Sprintf("tfvolumetest-%d", rInt)),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "size", "1024000000"),
+					resource.TestCheckResourceAttrSet(testAccCheckPureVolumeResourceName, "serial"),
+				),
+			},
+			{
+				Config: testAccCheckPureVolumeConfig_clone(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureVolumeExists(testAccCheckPureVolumeCloneResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeCloneResourceName, "source", fmt.Sprintf("tfvolumetest-%d", rInt)),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureVolume_update(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureVolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureVolumeConfig(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureVolumeExists(testAccCheckPureVolumeResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "name", fmt.Sprintf("tfvolumetest-%d", rInt)),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "size", "1024000000"),
+					resource.TestCheckResourceAttrSet(testAccCheckPureVolumeResourceName, "serial"),
+				),
+			},
+			{
+				Config: testAccCheckPureVolumeConfig_resize(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureVolumeExists(testAccCheckPureVolumeResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "name", fmt.Sprintf("tfvolumetest-%d", rInt)),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "size", "2048000000"),
+					resource.TestCheckResourceAttrSet(testAccCheckPureVolumeResourceName, "serial"),
+				),
+			},
+			{
+				Config: testAccCheckPureVolumeConfig_rename(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureVolumeExists(testAccCheckPureVolumeResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "name", fmt.Sprintf("tfvolumetest-rename-%d", rInt)),
+					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "size", "2048000000"),
+					resource.TestCheckResourceAttrSet(testAccCheckPureVolumeResourceName, "serial"),
+				),
 			},
 		},
 	})
@@ -78,4 +143,41 @@ func testAccCheckPureVolumeExists(n string, exists bool) resource.TestCheckFunc 
 		}
 		return nil
 	}
+}
+
+func testAccCheckPureVolumeConfig(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_volume" "tfvolumetest" {
+        name = "tfvolumetest-%d"
+        size = 1024000000
+}`, rInt)
+}
+
+func testAccCheckPureVolumeConfig_clone(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_volume" "tfvolumetest" {
+        name = "tfvolumetest-%d"
+        size = 1024000000
+}
+
+resource "purestorage_volume" "tfclonevolumetest" {
+        name = "tfclonevolumetest-%d"
+        source = "${purestorage_volume.tfvolumetest.name}"
+}`, rInt, rInt)
+}
+
+func testAccCheckPureVolumeConfig_resize(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_volume" "tfvolumetest" {
+	name = "tfvolumetest-%d"
+	size = 2048000000
+}`, rInt)
+}
+
+func testAccCheckPureVolumeConfig_rename(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_volume" "tfvolumetest" {
+        name = "tfvolumetest-rename-%d"
+        size = 2048000000
+}`, rInt)
 }

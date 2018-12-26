@@ -140,7 +140,7 @@ $ make test
 ```
 
 To run acceptance tests, run `make testacc`.
-Volumes created during the acceptance tests are not eradicated. So to run the acceptance tests more than once in a 24 hour period, the "tfvolumetest" volume will need to be eradicated manually.
+Volumes created during the acceptance tests are not eradicated. 
 
 ```sh
 $ make testacc
