@@ -170,7 +170,14 @@ func resourcePureHostgroupDelete(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	_, err := client.Hostgroups.DeleteHostgroup(d.Id(), nil)
+	var hosts []string
+	data := map[string][]string{"hostlist": hosts}
+	_, err := client.Hostgroups.SetHostgroup(d.Id(), nil, data)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.Hostgroups.DeleteHostgroup(d.Id(), nil)
 	if err != nil {
 		return err
 	}

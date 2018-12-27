@@ -130,6 +130,7 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			return err
 		}
+		d.SetId(h.Name)
 	}
 
 	var wwnlist []string
@@ -186,8 +187,6 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 	}
-
-	d.SetId(h.Name)
 	return resourcePureHostRead(d, m)
 }
 

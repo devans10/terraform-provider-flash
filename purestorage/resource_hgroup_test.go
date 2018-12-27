@@ -11,25 +11,8 @@ import (
 
 const testAccCheckPureHostgroupResourceName = "purestorage_hostgroup.tfhostgrouptest"
 
-const testAccCheckPureHostgroupConfig = `
-resource "purestorage_hostgroup" "tfhostgrouptest" {
-	name = "tfhostgrouptest"
-}
-`
-
-const testAccCheckPureHostgroupConfigWithHostlist = `
-resource "purestorage_host" "tfhosttest" {
-	name = "tfhosttest"
-}
-
-resource "purestorage_hostgroup" "tfhostgrouptest" {
-        name = "tfhostgrouptest"
-	hostlist = ["${purestorage_host.tfhostest.name}"]
-}
-`
-
 // Create a hostgroup
-func TestAccResourcePureHostgroup_createHostgroup(t *testing.T) {
+func TestAccResourcePureHostgroup_create(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -37,8 +20,52 @@ func TestAccResourcePureHostgroup_createHostgroup(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostgroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostgroupConfig,
-				Check:  resource.ComposeTestCheckFunc(testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true)),
+				Config: testAccCheckPureHostgroupConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureHostgroup_create_withHostlist(t *testing.T) {
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureHostgroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureHostgroupConfig_withHostlist(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
+					testAccCheckPureHostgroupHosts(testAccCheckPureHostgroupResourceName, "tfhostgrouptesthost", true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureHostgroup_update(t *testing.T) {
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureHostgroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureHostgroupConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
+				),
+			},
+			{
+				Config: testAccCheckPureHostgroupConfig_rename(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", "tfhostgrouptestrename"),
+				),
 			},
 		},
 	})
@@ -75,7 +102,8 @@ func testAccCheckPureHostgroupExists(n string, exists bool) resource.TestCheckFu
 		}
 
 		client := testAccProvider.Meta().(*flasharray.Client)
-		_, err := client.Hostgroups.GetHostgroup(rs.Primary.ID, nil)
+		name := rs.Primary.Attributes["name"]
+		_, err := client.Hostgroups.GetHostgroup(name, nil)
 		if err != nil {
 			if exists {
 				return fmt.Errorf("hostgroup does not exist: %s", n)
@@ -84,4 +112,61 @@ func testAccCheckPureHostgroupExists(n string, exists bool) resource.TestCheckFu
 		}
 		return nil
 	}
+}
+
+func testAccCheckPureHostgroupHosts(n string, host string, exists bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		client := testAccProvider.Meta().(*flasharray.Client)
+		name := rs.Primary.Attributes["name"]
+		h, err := client.Hostgroups.GetHostgroup(name, nil)
+		if err != nil {
+			return fmt.Errorf("hostgroup does not exist: %s", n)
+		}
+
+		if stringInSlice(host, h.Hosts) {
+			if exists {
+				return nil
+			}
+			return fmt.Errorf("Host %s still a member of hostgroup.", host)
+		}
+		if exists {
+			return fmt.Errorf("Host %s not a member of hostgroup.", host)
+		}
+		return nil
+	}
+}
+
+func testAccCheckPureHostgroupConfig() string {
+	return fmt.Sprintf(`
+resource "purestorage_hostgroup" "tfhostgrouptest" {
+        name = "tfhostgrouptest"
+}`)
+}
+
+func testAccCheckPureHostgroupConfig_withHostlist() string {
+	return fmt.Sprintf(`
+resource "purestorage_host" "tfhostgrouptesthost" {
+        name = "tfhostgrouptesthost"
+}
+
+resource "purestorage_hostgroup" "tfhostgrouptest" {
+        name = "tfhostgrouptest"
+        hosts = ["${purestorage_host.tfhostgrouptesthost.name}"]
+}`)
+}
+
+func testAccCheckPureHostgroupConfig_rename() string {
+	return fmt.Sprintf(`
+resource "purestorage_hostgroup" "tfhostgrouptest" {
+        name = "tfhostgrouptestrename"
+}`)
 }
