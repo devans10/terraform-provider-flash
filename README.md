@@ -1,6 +1,6 @@
 Terraform Provider Purestorage
 ==================
-<img src="https://travis-ci.com/devans10/terraform-provider-purestorage.svg?branch=master>
+<img src="https://travis-ci.com/devans10/terraform-provider-purestorage.svg?branch=master">
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
