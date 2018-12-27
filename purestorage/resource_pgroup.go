@@ -180,7 +180,7 @@ func resourcePureProtectiongroupCreate(d *schema.ResourceData, m interface{}) er
 		}
 	}
 
-	data := map[string][]string{"hostlist": hosts, "vollist": volumes, "hgrouplist": hgroups, "targetlist": targets}
+	data := map[string]interface{}{"hostlist": hosts, "vollist": volumes, "hgrouplist": hgroups, "targetlist": targets}
 	pgroup, err := client.Protectiongroups.CreateProtectiongroup(p.(string), data, nil)
 	if err != nil {
 		return err

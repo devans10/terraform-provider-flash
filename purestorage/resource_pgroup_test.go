@@ -13,7 +13,7 @@ import (
 const testAccCheckPureProtectiongroupResourceName = "purestorage_protectiongroup.tfprotectiongrouptest"
 
 // Create a protectiongroup
-func TestAccResourcePureProtectiongroup_createProtectiongroup(t *testing.T) {
+func TestAccResourcePureProtectiongroup_create(t *testing.T) {
 	rInt := rand.Int()
 
 	resource.Test(t, resource.TestCase{
@@ -22,8 +22,70 @@ func TestAccResourcePureProtectiongroup_createProtectiongroup(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig(rInt),
-				Check:  resource.ComposeTestCheckFunc(testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true)),
+				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureProtectiongroup_create_withHosts(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureProtectiongroupConfig_withHosts(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+					testAccCheckPureHostExists("purestorage_host.tfpgrouptesthost", true),
+					testAccCheckPureProtectiongroupHosts(testAccCheckPureProtectiongroupResourceName, "tfpgrouptesthost", true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureProtectiongroup_create_withHostgroups(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureProtectiongroupConfig_withHostgroups(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+					testAccCheckPureHostgroupExists("purestorage_hostgroup.tfpgrouptesthgroup", true),
+					testAccCheckPureProtectiongroupHostgroups(testAccCheckPureProtectiongroupResourceName, "tfpgrouptesthgroup", true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureProtectiongroup_create_withVolumes(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureProtectiongroupConfig_withVolumes(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+					testAccCheckPureVolumeExists("purestorage_volume.tfpgrouptest-volume", true),
+					testAccCheckPureProtectiongroupVolumes(testAccCheckPureProtectiongroupResourceName, fmt.Sprintf("tfpgrouptest-volume-%d", rInt), true),
+				),
 			},
 		},
 	})
@@ -60,7 +122,8 @@ func testAccCheckPureProtectiongroupExists(n string, exists bool) resource.TestC
 		}
 
 		client := testAccProvider.Meta().(*flasharray.Client)
-		_, err := client.Protectiongroups.GetProtectiongroup(rs.Primary.ID, nil, nil)
+		name := rs.Primary.Attributes["name"]
+		_, err := client.Protectiongroups.GetProtectiongroup(name, nil, nil)
 		if err != nil {
 			if exists {
 				return fmt.Errorf("protectiongroup does not exist: %s", n)
@@ -71,21 +134,136 @@ func testAccCheckPureProtectiongroupExists(n string, exists bool) resource.TestC
 	}
 }
 
-func testAccCheckPureProtectiongroupConfig(rInt int) string {
+func testAccCheckPureProtectiongroupHosts(n string, host string, exists bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		client := testAccProvider.Meta().(*flasharray.Client)
+		name := rs.Primary.Attributes["name"]
+		p, err := client.Protectiongroups.GetProtectiongroup(name, nil, nil)
+		if err != nil {
+			return fmt.Errorf("protectiongroup does not exist: %s", n)
+		}
+		if stringInSlice(host, p.Hosts) {
+			if exists {
+				return nil
+			}
+			return fmt.Errorf("Host %s still connected to Protection Group %s.", host, name)
+		}
+		if exists {
+			return fmt.Errorf("Host %s not connected to Protection Group %s.", host, name)
+		}
+		return nil
+	}
+}
+
+func testAccCheckPureProtectiongroupHostgroups(n string, hostgroup string, exists bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		client := testAccProvider.Meta().(*flasharray.Client)
+		name := rs.Primary.Attributes["name"]
+		p, err := client.Protectiongroups.GetProtectiongroup(name, nil, nil)
+		if err != nil {
+			return fmt.Errorf("protectiongroup does not exist: %s", name)
+		}
+		if stringInSlice(hostgroup, p.Hgroups) {
+			if exists {
+				return nil
+			}
+			return fmt.Errorf("Hostgroup %s still connected to Protection Group %s.", hostgroup, name)
+		}
+		if exists {
+			return fmt.Errorf("Hostgroup %s not connected to Protection Group %s.", hostgroup, name)
+		}
+		return nil
+	}
+}
+
+func testAccCheckPureProtectiongroupVolumes(n string, volume string, exists bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		client := testAccProvider.Meta().(*flasharray.Client)
+		name := rs.Primary.Attributes["name"]
+		p, err := client.Protectiongroups.GetProtectiongroup(name, nil, nil)
+		if err != nil {
+			return fmt.Errorf("protectiongroup does not exist: %s", n)
+		}
+		if stringInSlice(volume, p.Volumes) {
+			if exists {
+				return nil
+			}
+			return fmt.Errorf("Volume %s still connected to Protection Group.", volume)
+		}
+		if exists {
+			return fmt.Errorf("Volume %s not connected to Protection Group.", volume)
+		}
+		return nil
+	}
+}
+
+func testAccCheckPureProtectiongroupConfig_basic(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
         name = "tfprotectiongrouptest-%d"
 }`, rInt)
 }
 
-func testAccCheckPureProtectiongroupConfigWithHostlist(rInt int) string {
+func testAccCheckPureProtectiongroupConfig_withHosts(rInt int) string {
 	return fmt.Sprintf(`
-resource "purestorage_host" "tfhosttest" {
-        name = "tfhosttest%d"
+resource "purestorage_host" "tfpgrouptesthost" {
+        name = "tfpgrouptesthost"
 }
 
 resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
         name = "tfprotectiongrouptest-%d"
-        hostlist = ["${purestorage_host.tfhostest.name}"]
+        hosts = ["${purestorage_host.tfpgrouptesthost.name}"]
+}`, rInt)
+}
+
+func testAccCheckPureProtectiongroupConfig_withVolumes(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_volume" "tfpgrouptest-volume" {
+	name = "tfpgrouptest-volume-%d"
+	size = 1024000000
+}
+
+resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
+	name = "tfprotectiongrouptest-%d"
+	volumes = ["${purestorage_volume.tfpgrouptest-volume.name}"]
 }`, rInt, rInt)
+}
+
+func testAccCheckPureProtectiongroupConfig_withHostgroups(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_hostgroup" "tfpgrouptesthgroup" {
+	name = "tfpgrouptesthgroup"
+}
+
+resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
+        name = "tfprotectiongrouptest-%d"
+        hgroups = ["${purestorage_hostgroup.tfpgrouptesthgroup.name}"]
+}`, rInt)
 }
