@@ -2,19 +2,19 @@ Terraform Provider Purestorage
 ==================
 [![Build Status](https://travis-ci.com/devans10/terraform-provider-purestorage.svg?branch=master)](https://travis-ci.com/devans10/terraform-provider-purestorage)
 
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="300px">
+This is the repository for the Terraform Purestorage Provider.  The plugin provides resources for the Purestorage FlashArray to be managed within Terraform.
 
-Maintainers
------------
+For general information about Terraform, visit the [official website](https://terraform.io) and the [GitHub project page.](https://github.com/hashicorp/terraform)
 
 This provider plugin is maintained by Dave Evans.
+
+Please submit issues [here](https://github.com/devans10/terraform-provider-purestorage/issues).
 
 Requirements
 ------------
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
--	[Go](https://golang.org/doc/install) 1.8 (to build the provider plugin)
--	[Pure Storage Go Client](https://github.com/devans10/go-purestorage)
+-	[Terraform](https://www.terraform.io/downloads.html) 0.11.x (the provider was tested against 0.11.10)
+-	[Go](https://golang.org/doc/install) 1.11 (to build the provider plugin)
 
 Usage
 ---------------------
@@ -50,7 +50,7 @@ provider "purestorage" {
 
 ***Configure in environment***
 
-Set username(`PURESTORAGE_USERNAME`) and password(`PURESTORAGE_PASSWORD`) or API Token(`PURESTORAGE_APITOKEN`) and endpoint(`PURESTORAGE_TARGET`) in environment.
+Set username(`PURE_USERNAME`) and password(`PURE_PASSWORD`) or API Token(`PURE_APITOKEN`) and endpoint(`PURE_TARGET`) in environment.
 ```
 provider "purestorage" {}
 ```
@@ -81,7 +81,7 @@ Create one volume
 ```
 resource "purestorage_volume" "testvol_tf" {
 	name = "testvol_tf"
-	size = "1G"
+	size = "1048000000"
 }
 ```
 
@@ -141,7 +141,7 @@ $ make test
 ```
 
 To run acceptance tests, run `make testacc`.
-Volumes created during the acceptance tests are not eradicated. 
+Volumes and Protection Groups created during the acceptance tests are not eradicated. 
 
 ```sh
 $ make testacc
