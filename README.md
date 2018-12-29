@@ -1,8 +1,8 @@
 Terraform Provider Purestorage
 ==================
-<img src="https://travis-ci.com/devans10/terraform-provider-purestorage.svg?branch=master">
+[![Build Status](https://travis-ci.com/devans10/terraform-provider-purestorage.svg?branch=master)](https://travis-ci.com/devans10/terraform-provider-purestorage)
 
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
+<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="300px">
 
 Maintainers
 -----------
