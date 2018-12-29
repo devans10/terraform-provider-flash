@@ -393,7 +393,7 @@ func resourcePureProtectiongroupUpdate(d *schema.ResourceData, m interface{}) er
 		}
 	}
 
-	if data != nil {
+	if len(data) > 0 {
 		pgroup, err = client.Protectiongroups.SetProtectiongroup(d.Id(), nil, data)
 		if err != nil {
 			return err
@@ -442,7 +442,7 @@ func resourcePureProtectiongroupUpdate(d *schema.ResourceData, m interface{}) er
 		}
 	}
 
-	if retention_data != nil {
+	if len(retention_data) > 0 {
 		pgroup, err = client.Protectiongroups.SetProtectiongroup(p.(string), nil, retention_data)
 		if err != nil {
 			return err
@@ -486,7 +486,7 @@ func resourcePureProtectiongroupUpdate(d *schema.ResourceData, m interface{}) er
 		}
 	}
 
-	if schedule_data != nil {
+	if len(schedule_data) > 0 {
 		pgroup, err = client.Protectiongroups.SetProtectiongroup(p.(string), nil, schedule_data)
 		if err != nil {
 			return err

@@ -91,6 +91,168 @@ func TestAccResourcePureProtectiongroup_create_withVolumes(t *testing.T) {
 	})
 }
 
+func TestAccResourcePureProtectiongroup_create_withSchedule(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureProtectiongroupConfig_withSchedule(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureProtectiongroup_create_withRetention(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureProtectiongroupConfig_withRetention(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureProtectiongroup_update_withHosts(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+				),
+			},
+			{
+				Config: testAccCheckPureProtectiongroupConfig_withHosts(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+					testAccCheckPureHostExists("purestorage_host.tfpgrouptesthost", true),
+					testAccCheckPureProtectiongroupHosts(testAccCheckPureProtectiongroupResourceName, "tfpgrouptesthost", true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureProtectiongroup_update_withHostgroups(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+				),
+			},
+			{
+				Config: testAccCheckPureProtectiongroupConfig_withHostgroups(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+					testAccCheckPureHostgroupExists("purestorage_hostgroup.tfpgrouptesthgroup", true),
+					testAccCheckPureProtectiongroupHostgroups(testAccCheckPureProtectiongroupResourceName, "tfpgrouptesthgroup", true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureProtectiongroup_update_withVolumes(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+				),
+			},
+			{
+				Config: testAccCheckPureProtectiongroupConfig_withVolumes(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+					testAccCheckPureVolumeExists("purestorage_volume.tfpgrouptest-volume", true),
+					testAccCheckPureProtectiongroupVolumes(testAccCheckPureProtectiongroupResourceName, fmt.Sprintf("tfpgrouptest-volume-%d", rInt), true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureProtectiongroup_update_withSchedule(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+				),
+			},
+			{
+				Config: testAccCheckPureProtectiongroupConfig_withSchedule(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourcePureProtectiongroup_update_withRetention(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+				),
+			},
+			{
+				Config: testAccCheckPureProtectiongroupConfig_withRetention(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckPureProtectiongroupDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*flasharray.Client)
 
@@ -265,5 +427,28 @@ resource "purestorage_hostgroup" "tfpgrouptesthgroup" {
 resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
         name = "tfprotectiongrouptest-%d"
         hgroups = ["${purestorage_hostgroup.tfpgrouptesthgroup.name}"]
+}`, rInt)
+}
+
+func testAccCheckPureProtectiongroupConfig_withSchedule(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
+        name = "tfprotectiongrouptest-%d"
+	replicate_enabled = "true"
+	replicate_at = "3600"
+	replicate_frequency = "86400"
+	snap_enabled = "true"
+	snap_at = "60"
+	snap_frequency = "86400"
+}`, rInt)
+}
+
+func testAccCheckPureProtectiongroupConfig_withRetention(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
+	name = "tfprotectiongrouptest-%d"
+	all_for = 86400
+	days = 8
+	per_day = 5
 }`, rInt)
 }
