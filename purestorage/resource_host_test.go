@@ -143,7 +143,7 @@ func testAccCheckPureHostDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := client.Hosts.GetHost(rs.Primary.ID, nil)
+		_, err := client.Hosts.GetHost(rs.Primary.ID)
 		if err != nil {
 			return nil
 		} else {
@@ -167,7 +167,7 @@ func testAccCheckPureHostExists(n string, exists bool) resource.TestCheckFunc {
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name, ok := rs.Primary.Attributes["name"]
-		_, err := client.Hosts.GetHost(name, nil)
+		_, err := client.Hosts.GetHost(name)
 		if err != nil {
 			if exists {
 				return fmt.Errorf("host does not exist: %s", n)
@@ -191,7 +191,7 @@ func testAccCheckPureHostWWN(n string, wwn string, exists bool) resource.TestChe
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name, ok := rs.Primary.Attributes["name"]
-		h, err := client.Hosts.GetHost(name, nil)
+		h, err := client.Hosts.GetHost(name)
 		if err != nil {
 			return fmt.Errorf("host does not exist: %s", n)
 		}
@@ -221,7 +221,7 @@ func testAccCheckPureHostVolumeConnection(n string, volume string, exists bool) 
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name, ok := rs.Primary.Attributes["name"]
-		volumes, err := client.Hosts.ListHostConnections(name, nil)
+		volumes, err := client.Hosts.ListHostConnections(name)
 		if err != nil {
 			return fmt.Errorf("host does not exist: %s", n)
 		}

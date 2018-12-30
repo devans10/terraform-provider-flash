@@ -62,12 +62,12 @@ func resourcePureVolumeCreate(d *schema.ResourceData, m interface{}) error {
 	s, _ := d.GetOk("source")
 	if s.(string) == "" {
 		z, _ := d.GetOk("size")
-		v, err = client.Volumes.CreateVolume(n.(string), z.(int), nil)
+		v, err = client.Volumes.CreateVolume(n.(string), z.(int))
 		if err != nil {
 			return err
 		}
 	} else {
-		v, err = client.Volumes.CopyVolume(n.(string), s.(string), false, nil)
+		v, err = client.Volumes.CopyVolume(n.(string), s.(string), false)
 		if err != nil {
 			return err
 		}
@@ -119,7 +119,7 @@ func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 
 	n, _ := d.GetOk("name")
 	if n.(string) != oldVol.Name {
-		v, err = client.Volumes.RenameVolume(d.Id(), n.(string), nil)
+		v, err = client.Volumes.RenameVolume(d.Id(), n.(string))
 		if err != nil {
 			return err
 		}
@@ -127,12 +127,12 @@ func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 
 	s, _ := d.GetOk("source")
 	if s.(string) != oldVol.Source {
-		snapshot, err := client.Volumes.CreateSnapshot(d.Id(), "", nil)
+		snapshot, err := client.Volumes.CreateSnapshot(d.Id(), "")
 		if err != nil {
 			return err
 		}
 		log.Printf("[INFO] Created volume snapshot %s before overwriting volume %s.", snapshot.Name, d.Id())
-		v, err = client.Volumes.CopyVolume(d.Id(), s.(string), true, nil)
+		v, err = client.Volumes.CopyVolume(d.Id(), s.(string), true)
 		if err != nil {
 			return err
 		}
@@ -140,7 +140,7 @@ func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 
 	z, _ := d.GetOk("size")
 	if z.(int) > oldVol.Size {
-		v, err = client.Volumes.ExtendVolume(d.Id(), z.(int), nil)
+		v, err = client.Volumes.ExtendVolume(d.Id(), z.(int))
 		if err != nil {
 			return err
 		}
@@ -159,7 +159,7 @@ func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 // the volume will be eradicated.
 func resourcePureVolumeDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*flasharray.Client)
-	_, err := client.Volumes.DeleteVolume(d.Id(), nil)
+	_, err := client.Volumes.DeleteVolume(d.Id())
 
 	if err != nil {
 		return err

@@ -261,7 +261,7 @@ func testAccCheckPureProtectiongroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := client.Protectiongroups.GetProtectiongroup(rs.Primary.ID, nil, nil)
+		_, err := client.Protectiongroups.GetProtectiongroup(rs.Primary.ID, nil)
 		if err != nil {
 			return nil
 		} else {
@@ -285,7 +285,7 @@ func testAccCheckPureProtectiongroupExists(n string, exists bool) resource.TestC
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name := rs.Primary.Attributes["name"]
-		_, err := client.Protectiongroups.GetProtectiongroup(name, nil, nil)
+		_, err := client.Protectiongroups.GetProtectiongroup(name, nil)
 		if err != nil {
 			if exists {
 				return fmt.Errorf("protectiongroup does not exist: %s", n)
@@ -309,7 +309,7 @@ func testAccCheckPureProtectiongroupHosts(n string, host string, exists bool) re
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name := rs.Primary.Attributes["name"]
-		p, err := client.Protectiongroups.GetProtectiongroup(name, nil, nil)
+		p, err := client.Protectiongroups.GetProtectiongroup(name, nil)
 		if err != nil {
 			return fmt.Errorf("protectiongroup does not exist: %s", n)
 		}
@@ -339,7 +339,7 @@ func testAccCheckPureProtectiongroupHostgroups(n string, hostgroup string, exist
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name := rs.Primary.Attributes["name"]
-		p, err := client.Protectiongroups.GetProtectiongroup(name, nil, nil)
+		p, err := client.Protectiongroups.GetProtectiongroup(name, nil)
 		if err != nil {
 			return fmt.Errorf("protectiongroup does not exist: %s", name)
 		}
@@ -369,7 +369,7 @@ func testAccCheckPureProtectiongroupVolumes(n string, volume string, exists bool
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name := rs.Primary.Attributes["name"]
-		p, err := client.Protectiongroups.GetProtectiongroup(name, nil, nil)
+		p, err := client.Protectiongroups.GetProtectiongroup(name, nil)
 		if err != nil {
 			return fmt.Errorf("protectiongroup does not exist: %s", n)
 		}

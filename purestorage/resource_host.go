@@ -69,7 +69,7 @@ func resourcePureHostCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	data := map[string][]string{"wwnlist": wwnlist, "iqnlist": iqnlist}
-	h, err := client.Hosts.CreateHost(v.(string), nil, data)
+	h, err := client.Hosts.CreateHost(v.(string), data)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func resourcePureHostCreate(d *schema.ResourceData, m interface{}) error {
 
 	if connected_volumes != nil {
 		for _, volume := range connected_volumes {
-			_, err = client.Hosts.ConnectHost(h.Name, volume, nil)
+			_, err = client.Hosts.ConnectHost(h.Name, volume)
 			if err != nil {
 				return err
 			}
@@ -97,7 +97,7 @@ func resourcePureHostCreate(d *schema.ResourceData, m interface{}) error {
 func resourcePureHostRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*flasharray.Client)
 
-	host, _ := client.Hosts.GetHost(d.Id(), nil)
+	host, _ := client.Hosts.GetHost(d.Id())
 
 	if host == nil {
 		d.SetId("")
@@ -105,7 +105,7 @@ func resourcePureHostRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	var connected_volumes []string
-	cv, _ := client.Hosts.ListHostConnections(host.Name, nil)
+	cv, _ := client.Hosts.ListHostConnections(host.Name)
 	for _, volume := range cv {
 		connected_volumes = append(connected_volumes, volume.Vol)
 	}
@@ -122,11 +122,11 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 	var h *flasharray.Host
 	var err error
 
-	oldHost, _ := client.Hosts.GetHost(d.Id(), nil)
+	oldHost, _ := client.Hosts.GetHost(d.Id())
 
 	n, _ := d.GetOk("name")
 	if n.(string) != oldHost.Name {
-		h, err = client.Hosts.RenameHost(d.Id(), n.(string), nil)
+		h, err = client.Hosts.RenameHost(d.Id(), n.(string))
 		if err != nil {
 			return err
 		}
@@ -140,7 +140,7 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	if !sameStringSlice(wwnlist, oldHost.Wwn) {
 		data := map[string]interface{}{"wwnlist": wwnlist}
-		h, err = client.Hosts.SetHost(d.Id(), nil, data)
+		h, err = client.Hosts.SetHost(d.Id(), data)
 		if err != nil {
 			return err
 		}
@@ -153,7 +153,7 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	if !sameStringSlice(iqnlist, oldHost.Iqn) {
 		data := map[string]interface{}{"iqnlist": iqnlist}
-		h, err = client.Hosts.SetHost(d.Id(), nil, data)
+		h, err = client.Hosts.SetHost(d.Id(), data)
 		if err != nil {
 			return err
 		}
@@ -165,7 +165,7 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 		connected_volumes = append(connected_volumes, element.(string))
 	}
 	var current_volumes []string
-	curvols, _ := client.Hosts.ListHostConnections(d.Id(), nil)
+	curvols, _ := client.Hosts.ListHostConnections(d.Id())
 	for _, volume := range curvols {
 		current_volumes = append(current_volumes, volume.Vol)
 	}
@@ -173,7 +173,7 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 	if !sameStringSlice(connected_volumes, current_volumes) {
 		connect_volumes := difference(connected_volumes, current_volumes)
 		for _, volume := range connect_volumes {
-			_, err = client.Hosts.ConnectHost(d.Id(), volume, nil)
+			_, err = client.Hosts.ConnectHost(d.Id(), volume)
 			if err != nil {
 				return err
 			}
@@ -181,7 +181,7 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 
 		disconnect_volumes := difference(current_volumes, connected_volumes)
 		for _, volume := range disconnect_volumes {
-			_, err = client.Hosts.DisconnectHost(d.Id(), volume, nil)
+			_, err = client.Hosts.DisconnectHost(d.Id(), volume)
 			if err != nil {
 				return err
 			}
@@ -201,14 +201,14 @@ func resourcePureHostDelete(d *schema.ResourceData, m interface{}) error {
 	}
 	if connected_volumes != nil {
 		for _, volume := range connected_volumes {
-			_, err := client.Hosts.DisconnectHost(d.Id(), volume, nil)
+			_, err := client.Hosts.DisconnectHost(d.Id(), volume)
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	_, err := client.Hosts.DeleteHost(d.Id(), nil)
+	_, err := client.Hosts.DeleteHost(d.Id())
 
 	if err != nil {
 		return err
@@ -221,14 +221,14 @@ func resourcePureHostDelete(d *schema.ResourceData, m interface{}) error {
 func resourcePureHostImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	client := m.(*flasharray.Client)
 
-	host, err := client.Hosts.GetHost(d.Id(), nil)
+	host, err := client.Hosts.GetHost(d.Id())
 
 	if err != nil {
 		return nil, err
 	}
 
 	var connected_volumes []string
-	cv, _ := client.Hosts.ListHostConnections(host.Name, nil)
+	cv, _ := client.Hosts.ListHostConnections(host.Name)
 	for _, volume := range cv {
 		connected_volumes = append(connected_volumes, volume.Vol)
 	}

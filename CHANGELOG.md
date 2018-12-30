@@ -1,3 +1,10 @@
+## 0.2.1
+
+NOTES:
+
+* Updated go-purestorage library to v0.1.2
+* Updated documentation
+
 ## 0.2.0 (December 28, 2018)
 
 NOTES:

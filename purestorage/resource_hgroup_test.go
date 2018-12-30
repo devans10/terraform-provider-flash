@@ -213,7 +213,7 @@ func testAccCheckPureHostgroupVolumes(n string, volume string, exists bool) reso
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name := rs.Primary.Attributes["name"]
-		h, err := client.Hostgroups.ListHostgroupConnections(name, nil)
+		h, err := client.Hostgroups.ListHostgroupConnections(name)
 		if err != nil {
 			return fmt.Errorf("hostgroup does not exist: %s", n)
 		}
