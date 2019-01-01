@@ -3,14 +3,14 @@ sudo: false
 language: go
 matrix:
   include:
-    - go: 1.x
-      env: LATEST=true
-    - go: 1.9.x
-    - go: 1.10.x
-    - go: 1.11.x
-    - go: tip
+  - go: 1.x
+    env: LATEST=true
+  - go: 1.9.x
+  - go: 1.10.x
+  - go: 1.11.x
+  - go: tip
   allow_failures:
-    - go: tip
+  - go: tip
 before_install:
 - go get github.com/mitchellh/gox
 install:
@@ -21,23 +21,30 @@ script:
 - make test
 - make vendor-status
 - make vet
-- if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="{{.OS}}/terraform-provider-purestorage" -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
-- if [ "${LATEST}" = "true" ]; then sha1sum windows/terraform-provider-purestorage.exe > terraform-provider-purestorage.windows.sha1; tar -czf terraform-provider-purestorage.windows.tar.gz  windows/terraform-provider-purestorage.exe; fi
-- if [ "${LATEST}" = "true" ]; then sha1sum darwin/terraform-provider-purestorage > terraform-provider-purestorage.darwin.sha1; tar -czf terraform-provider-purestorage.darwin.tar.gz  darwin/terraform-provider-purestorage; fi
-- if [ "${LATEST}" = "true" ]; then sha1sum linux/terraform-provider-purestorage > terraform-provider-purestorage.linux.sha1; tar -czf terraform-provider-purestorage.linux.tar.gz  linux/terraform-provider-purestorage; fi
+- if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="{{.OS}}/terraform-provider-purestorage"
+  -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
+- if [ "${LATEST}" = "true" ]; then sha1sum windows/terraform-provider-purestorage.exe
+  > terraform-provider-purestorage.windows.sha1; tar -czf terraform-provider-purestorage.windows.tar.gz  windows/terraform-provider-purestorage.exe;
+  fi
+- if [ "${LATEST}" = "true" ]; then sha1sum darwin/terraform-provider-purestorage
+  > terraform-provider-purestorage.darwin.sha1; tar -czf terraform-provider-purestorage.darwin.tar.gz  darwin/terraform-provider-purestorage;
+  fi
+- if [ "${LATEST}" = "true" ]; then sha1sum linux/terraform-provider-purestorage >
+  terraform-provider-purestorage.linux.sha1; tar -czf terraform-provider-purestorage.linux.tar.gz  linux/terraform-provider-purestorage;
+  fi
 deploy:
   provider: releases
   skip_cleanup: true
   api_key:
-    secure: OnT68PG9JnUO0tSI7nz0K1OJNMeudTVC6pUM6+WLkLbVzI8z4LWiplWWnCZZk1B/873t3AK6XVFuOnITaVlXS9VNkBINU3YdfXMzqF1iz76n+3O6zjZn7v0Wx51LllrbCE9ZUTF9MmxkcqzMnEGqtok9ydtMGc6+aIDs/sCbebX26/2ieioT/D4J84r9LUSCIZuQmGzJBu3FAwOzuT5m6gauXqtXFbfylZig1UPk2tFwPupr6NIv1pJPSeT3epVoLxlxPOanJSeUIokqHSUmkUmgc2Gw7xrsPFFLybJOUfektuIhNqCw8T8aGZRdmH21L+3UTT6rNcdNgfzcrNQAjwulN/oIz5B/zgPDoecZxr0WCQm6ysDkdF3VpuytTElsRDJhef7lqCb6SVeIQKSbJcJTD0Ofyh+yj8LtGmR6rhUaPpMRC1rQjb/vOQpOJN7WuRQLf3FEN3eSXDYB8gGFX0Z0CW58MqZ8dzpm1ik3s8bIuGzY4vmhVVAuStZA0XBglHVdRnR11JlwrDVGKsdcBU/tPCs//mK6vG7yGqOmzF6IXoswc7jz6iQLBGuAJWQBw2MQH7FiyfZlF7ySt5c/H3Ycwf3Qrdj2O8eMnCnwmPanlDgfQw5szTiVKgEP67draJXOPJCEHa9BV2gqQu7co/W67BFlU9uD2SWHUWeweSs=
-  file: 
-    - terraform-provider-purestorage.windows.zip
-    - terraform-provider-purestorage.windows.sha1
-    - terraform-provider-purestorage.darwin.zip
-    - terraform-provider-purestorage.darwin.sha1
-    - terraform-provider-purestorage.linux.zip
-    - terraform-provider-purestorage.linux.sha1
+    secure: 0vPsuSxJlLWTxqtejpNM3hukLIjR3EAPN5chiu5MtwB6y9Ajk9DDak/pYX1LSsP8A6gvmxb1wGFBTNQMLx+DkJ7tUGAEDIXKkTMfB8O1bWwwHqJexnu4W/JD5K/tJ+Ys9DvOT0dHkrIlsks4cCVz2JXqwnj+iS78Lu1Euww619bSrTUZeDiGK9tKwISoKSU2b8E323X/JZGKNv1JkOxRLWwhnjXWF2WPWJJqfkUXi4lN1QNweBLNssmxXZ38Fv1x7fBa6FxiRBHfYmA2YqOgx6c95gQY+qKf2YyCdeXCW/3RY8w8nbG/HSHVNedcUwyhcAzFBlHsCt2ScDDC4j9Js7RxQrVk2YLlObpPN/pnQ+1Tux21SziM3BB/mrZgQ/+xkVC4lANtsaXgr/9gD0DZ2goVTgrDv6h8m3nvq0UB2WuiEHdSXg8NBzP2awx5B8/wyLZRcfIOEFZhCQkJAeO1O4kHyvkfx2Twbw6oHbYzi90JHItiu+PQJSJ/yFYoCajAb3dlv8TRcN9IqqjvC2Za2mOES3aN1T+WW2nSXuKAZ3ugZcyYm7l5lMMT9mGRW2ktNqT4BxEnS70JXj1vD1oC25OCYrhtT59CN7xn/jkflJBsX4PAS4KBcMeXMK4reZ8AP/4tSqCzks2qeCuZ/K0Y+Yr/p4eaXJmyes6Pu1UkxgU=
+  file:
+  - terraform-provider-purestorage.windows.zip
+  - terraform-provider-purestorage.windows.sha1
+  - terraform-provider-purestorage.darwin.zip
+  - terraform-provider-purestorage.darwin.sha1
+  - terraform-provider-purestorage.linux.zip
+  - terraform-provider-purestorage.linux.sha1
   on:
     repo: devans10/terraform-provider-purestorage
     tags: true
-    condition: $LATEST = true
+    condition: "$LATEST = true"
