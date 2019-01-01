@@ -34,17 +34,18 @@ script:
   fi
 deploy:
   provider: releases
-  skip_cleanup: true
   api_key:
-    secure: bsIA+daTW4ZBy3u7tBdVOZmgCKrGie/Sm2AHRhEUpMuO90+g5Kajxd5pZRPCrhtmCuMcIzyrmoW+GDdhvQGTWXBFXXo+aPRNwlVaVKyQNv7BN7FTLA9CpV2Bmx4RNooD+DA2pmeERdl5XQh2YgzxX0RjIuwBn3gSDld3tSfSm8wu7jR0QLnb2AYdysLuNtXqkEBvqzafEA6ASZ8gBNNxt+mKFqqfQhetowpDYaLP2S9Zs1eaZfM9AKeXreT/3LOH8+fq+s+zbd6onktEgbHxG5bnHp024PWdIBVuVuAhoydDh7KqdSMyugh7Bv+7XmPtBUMck7R0EmOFMuSDwSbH5KhWUSayj2SpsgtOl/6kYaZyokz5fUs5A2OZXGl/NVCvGV48WE80Q9So0RO8pVAEYk67/FU7+sVacXOl0aydCRFJNe17qUYXTwOlQKXwGW53rIQN1BDVJBskkYzVkMpMydOqlGz9Iq1Kpd1gYppFFfqpH6/nMEeQKwRB6pGnfB+DIpVOXLwWl53rBrXQN7T1p+1F22YGA5gF5G6Xc8vYKY7Psfu3eOc2y9VBaFItoxgEUW8i1OCzlkmsdhRXCZ81cT53KzHGaZXVDTqZM1jOWVB0Hus8yK4JPkyLqU/MvqMQF7/AYaMQoGq+QqUUuGMBVgiRx2JJ1v1wJwfdClbV5u8=
-  file:
-  - terraform-provider-purestorage.windows.zip
-  - terraform-provider-purestorage.windows.sha1
-  - terraform-provider-purestorage.darwin.zip
-  - terraform-provider-purestorage.darwin.sha1
-  - terraform-provider-purestorage.linux.zip
+    secure: deAUzT04UaxVdT9byBvMp8fIWTEGImV/kULtfltCkfYY0urnoSLRq3n1QkoIBsNTl3jUw5FX3szgRpMberVAJlqP3Yk7yOktWS0lsg/RkLqc0YTRZ80Btp978vapzKYqNPe4IJ8BTZqaVQ0Es9eQL5WsKVgSEUcUyHNEETWtxhfRI/Ex1nHOuoUkgPvkDAi/0zs8w2pgVLqbPTbWMuXk7l8F9dbVtzf4fs9oxHsxi89vhHDNA88U+ZPajzKaABK698eXvayntL5tfCEz4l5A1vkic6KCqwkOAGFFg/ctMIXgDjixTLMpHCh8cjJYkQXv0NgPSkNQPEuvgIi1p7chFoxl2u8A/r5U/73UH0u8WiP5h31VwAfrizow8GczI+Lwu9jLsONca4UyWJPlsozC33aTDYCg7n3IqTdfHjr8TpQtzqVlMF53nANz9nNa6G/yyy6jKSh/qRZ0f6aNYZrVGuAkYWbZluadWJojtyG3vEliHqRWzP9O0gKHosdmEC9vsb3E8+oBe1GhILcpd7EZqFGhkuKlna8bNO37IIw35Z/bLmNyqoJ2PIM3SS4j8GfYIR2xyvcfd4/qcgVpt+y9r++CV9LJfvrzQ6qQ+gbr8jOJfL5WhJFEWlramyYgr5O8fdkA6fHtYZWngMhCt0XayNOlYNWko0yvwjzhv6X5J+c=
+  file: 
+  - terraform-provider-purestorage.linux.tar.gz
   - terraform-provider-purestorage.linux.sha1
+  - terraform-provider-purestorage.darwin.tar.gz
+  - terraform-provider-purestorage.darwin.sha1
+  - terraform-provider-purestorage.windows.tar.gz
+  - terraform-provider-purestorage.windows.sha1
   on:
     repo: devans10/terraform-provider-purestorage
     tags: true
-    condition: "$LATEST = true"
+env:
+  global:
+    secure: deAUzT04UaxVdT9byBvMp8fIWTEGImV/kULtfltCkfYY0urnoSLRq3n1QkoIBsNTl3jUw5FX3szgRpMberVAJlqP3Yk7yOktWS0lsg/RkLqc0YTRZ80Btp978vapzKYqNPe4IJ8BTZqaVQ0Es9eQL5WsKVgSEUcUyHNEETWtxhfRI/Ex1nHOuoUkgPvkDAi/0zs8w2pgVLqbPTbWMuXk7l8F9dbVtzf4fs9oxHsxi89vhHDNA88U+ZPajzKaABK698eXvayntL5tfCEz4l5A1vkic6KCqwkOAGFFg/ctMIXgDjixTLMpHCh8cjJYkQXv0NgPSkNQPEuvgIi1p7chFoxl2u8A/r5U/73UH0u8WiP5h31VwAfrizow8GczI+Lwu9jLsONca4UyWJPlsozC33aTDYCg7n3IqTdfHjr8TpQtzqVlMF53nANz9nNa6G/yyy6jKSh/qRZ0f6aNYZrVGuAkYWbZluadWJojtyG3vEliHqRWzP9O0gKHosdmEC9vsb3E8+oBe1GhILcpd7EZqFGhkuKlna8bNO37IIw35Z/bLmNyqoJ2PIM3SS4j8GfYIR2xyvcfd4/qcgVpt+y9r++CV9LJfvrzQ6qQ+gbr8jOJfL5WhJFEWlramyYgr5O8fdkA6fHtYZWngMhCt0XayNOlYNWko0yvwjzhv6X5J+c=
