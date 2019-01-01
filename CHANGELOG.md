@@ -1,3 +1,9 @@
+## 0.3.2
+
+FIXES:
+
+* fixing build pipeline
+
 ## 0.3.1
 
 FIXES:

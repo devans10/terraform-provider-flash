@@ -21,7 +21,8 @@ script:
 - make test
 - make vendor-status
 - make vet
-- if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="terraform-provider-purestorage.." -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
+- if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="{{.OS}}/terraform-provider-purestorage" -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
+- if [ "${LATEST}" = "true" ]; for i in ./*; do; sha1sum $i/terraform-provider-purestorage > terraform-provider-purestorage.$i.sha1; zip terraform-provider-purestorage.$i.zip  $i/terraform-provider-purestorage; fi
 branches:
   only:
   - master
@@ -31,9 +32,12 @@ deploy:
   api_key:
     secure: OnT68PG9JnUO0tSI7nz0K1OJNMeudTVC6pUM6+WLkLbVzI8z4LWiplWWnCZZk1B/873t3AK6XVFuOnITaVlXS9VNkBINU3YdfXMzqF1iz76n+3O6zjZn7v0Wx51LllrbCE9ZUTF9MmxkcqzMnEGqtok9ydtMGc6+aIDs/sCbebX26/2ieioT/D4J84r9LUSCIZuQmGzJBu3FAwOzuT5m6gauXqtXFbfylZig1UPk2tFwPupr6NIv1pJPSeT3epVoLxlxPOanJSeUIokqHSUmkUmgc2Gw7xrsPFFLybJOUfektuIhNqCw8T8aGZRdmH21L+3UTT6rNcdNgfzcrNQAjwulN/oIz5B/zgPDoecZxr0WCQm6ysDkdF3VpuytTElsRDJhef7lqCb6SVeIQKSbJcJTD0Ofyh+yj8LtGmR6rhUaPpMRC1rQjb/vOQpOJN7WuRQLf3FEN3eSXDYB8gGFX0Z0CW58MqZ8dzpm1ik3s8bIuGzY4vmhVVAuStZA0XBglHVdRnR11JlwrDVGKsdcBU/tPCs//mK6vG7yGqOmzF6IXoswc7jz6iQLBGuAJWQBw2MQH7FiyfZlF7ySt5c/H3Ycwf3Qrdj2O8eMnCnwmPanlDgfQw5szTiVKgEP67draJXOPJCEHa9BV2gqQu7co/W67BFlU9uD2SWHUWeweSs=
   file: 
-    - terraform-provider-purestorage.windows.amd64.exe
-    - terraform-provider-purestorage.darwin.amd64
-    - terraform-provider-purestorage.linux.amd64
+    - terraform-provider-purestorage.windows.zip
+    - terraform-provider-purestorage.windows.sha1
+    - terraform-provider-purestorage.darwin.zip
+    - terraform-provider-purestorage.darwin.sha1
+    - terraform-provider-purestorage.linux.zip
+    - terraform-provider-purestorage.linux.sha1
   on:
     repo: devans10/terraform-provider-purestorage
     tags: true
