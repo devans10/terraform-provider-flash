@@ -43,6 +43,7 @@ deploy:
   - terraform-provider-purestorage.darwin.sha1
   - terraform-provider-purestorage.windows.tar.gz
   - terraform-provider-purestorage.windows.sha1
+  skip_cleanup: true
   on:
     repo: devans10/terraform-provider-purestorage
     tags: true
