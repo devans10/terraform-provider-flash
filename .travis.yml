@@ -14,15 +14,16 @@ matrix:
   allow_failures:
     - go: tip
 before_install:
-    - go get github.com/mitchellh/gox
+- go get github.com/mitchellh/gox
 install:
 - bash scripts/gogetcookie.sh
 - go get github.com/kardianos/govendor
+- go get github.com/mitchellh/gox
 script:
 - make test
 - make vendor-status
 - make vet
-- - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="terraform-provider-purestorage.." -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
+- if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="terraform-provider-purestorage.." -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
 branches:
   only:
   - master

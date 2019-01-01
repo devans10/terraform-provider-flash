@@ -1,3 +1,9 @@
+## 0.3.1
+
+FIXES:
+
+* minor update to travis.yml to fix build pipeline.
+
 ## 0.3.0
 
 IMPROVEMENTS:
