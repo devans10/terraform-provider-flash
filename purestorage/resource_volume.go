@@ -62,13 +62,11 @@ func resourcePureVolumeCreate(d *schema.ResourceData, m interface{}) error {
 	s, _ := d.GetOk("source")
 	if s.(string) == "" {
 		z, _ := d.GetOk("size")
-		v, err = client.Volumes.CreateVolume(n.(string), z.(int))
-		if err != nil {
+		if v, err = client.Volumes.CreateVolume(n.(string), z.(int)); err != nil {
 			return err
 		}
 	} else {
-		v, err = client.Volumes.CopyVolume(n.(string), s.(string), false)
-		if err != nil {
+		if v, err = client.Volumes.CopyVolume(n.(string), s.(string), false); err != nil {
 			return err
 		}
 	}
@@ -106,50 +104,46 @@ func resourcePureVolumeRead(d *schema.ResourceData, m interface{}) error {
 // extending volumes is supported at this time, since truncating volumes can
 // lead to data loss.
 func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
+	d.Partial(true)
+
 	client := m.(*flasharray.Client)
 	var v *flasharray.Volume
 	var err error
 
-	oldVol, _ := client.Volumes.GetVolume(d.Id(), nil)
-
-	if oldVol == nil {
-		d.SetId("")
-		return nil
-	}
-
-	n, _ := d.GetOk("name")
-	if n.(string) != oldVol.Name {
-		v, err = client.Volumes.RenameVolume(d.Id(), n.(string))
-		if err != nil {
+	if d.HasChange("name") {
+		if v, err = client.Volumes.RenameVolume(d.Id(), d.Get("name").(string)); err != nil {
 			return err
 		}
+		d.SetId(v.Name)
 	}
+	d.SetPartial("name")
 
-	s, _ := d.GetOk("source")
-	if s.(string) != oldVol.Source {
+	if d.HasChange("source") {
 		snapshot, err := client.Volumes.CreateSnapshot(d.Id(), "")
 		if err != nil {
 			return err
 		}
 		log.Printf("[INFO] Created volume snapshot %s before overwriting volume %s.", snapshot.Name, d.Id())
-		v, err = client.Volumes.CopyVolume(d.Id(), s.(string), true)
-		if err != nil {
+		if _, err = client.Volumes.CopyVolume(d.Id(), d.Get("source").(string), true); err != nil {
 			return err
 		}
 	}
+	d.SetPartial("source")
 
-	z, _ := d.GetOk("size")
-	if z.(int) > oldVol.Size {
-		v, err = client.Volumes.ExtendVolume(d.Id(), z.(int))
-		if err != nil {
-			return err
+	if d.HasChange("size") {
+		oldVol, err := client.Volumes.GetVolume(d.Id(), nil)
+		z, _ := d.GetOk("size")
+		if z.(int) > oldVol.Size {
+			if _, err = client.Volumes.ExtendVolume(d.Id(), z.(int)); err != nil {
+				return err
+			}
+		}
+		if z.(int) < oldVol.Size {
+			return fmt.Errorf("Error: New size must be larger than current size. Truncating volumes not supported.")
 		}
 	}
-	if z.(int) < oldVol.Size {
-		return fmt.Errorf("Error: New size must be larger than current size. Truncating volumes not supported.")
-	}
+	d.Partial(false)
 
-	d.SetId(v.Name)
 	return resourcePureVolumeRead(d, m)
 }
 

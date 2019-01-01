@@ -1,3 +1,11 @@
+## 0.3.0
+
+IMPROVEMENTS:
+
+* `resource/host`: Added CHAP parameters and host personality
+* Added Partial States to all resources
+* Updated .travis.yml to build cross-platform binaries
+
 ## 0.2.1
 
 NOTES:
