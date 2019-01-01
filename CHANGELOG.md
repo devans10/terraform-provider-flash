@@ -1,18 +1,4 @@
-## 0.3.4
-
-fixed tar command in travis.yml
-
-## 0.3.3
-
-I'm going to get this CI right evetually
-
-## 0.3.2
-
-FIXES:
-
-* fixing build pipeline
-
-## 0.3.1
+## 0.3.5
 
 FIXES:
 
