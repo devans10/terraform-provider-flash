@@ -1,8 +1,6 @@
 package purestorage
 
 import (
-	"reflect"
-
 	"github.com/devans10/go-purestorage/flasharray"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -145,9 +143,13 @@ func resourcePureProtectiongroup() *schema.Resource {
 }
 
 func resourcePureProtectiongroupCreate(d *schema.ResourceData, m interface{}) error {
+	d.Partial(true)
+
 	client := m.(*flasharray.Client)
+	var pgroup *flasharray.Protectiongroup
+	var err error
+
 	data := make(map[string]interface{})
-	p, _ := d.GetOk("name")
 
 	if h, ok := d.GetOk("hosts"); ok {
 		var hosts []string
@@ -181,10 +183,15 @@ func resourcePureProtectiongroupCreate(d *schema.ResourceData, m interface{}) er
 		data["targetlist"] = targets
 	}
 
-	pgroup, err := client.Protectiongroups.CreateProtectiongroup(p.(string), data)
-	if err != nil {
+	if pgroup, err = client.Protectiongroups.CreateProtectiongroup(d.Get("name").(string), data); err != nil {
 		return err
 	}
+	d.SetId(pgroup.Name)
+	d.SetPartial("name")
+	d.SetPartial("hosts")
+	d.SetPartial("volumes")
+	d.SetPartial("hgroups")
+	d.SetPartial("targets")
 
 	retention_data := make(map[string]interface{})
 	if all_for, ok := d.GetOk("all_for"); ok {
@@ -211,10 +218,15 @@ func resourcePureProtectiongroupCreate(d *schema.ResourceData, m interface{}) er
 		retention_data["target_per_day"] = target_per_day
 	}
 
-	pgroup, err = client.Protectiongroups.SetProtectiongroup(p.(string), retention_data)
-	if err != nil {
+	if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), retention_data); err != nil {
 		return err
 	}
+	d.SetPartial("all_for")
+	d.SetPartial("days")
+	d.SetPartial("per_day")
+	d.SetPartial("target_all_for")
+	d.SetPartial("target_days")
+	d.SetPartial("target_per_day")
 
 	schedule_data := make(map[string]interface{})
 
@@ -238,49 +250,50 @@ func resourcePureProtectiongroupCreate(d *schema.ResourceData, m interface{}) er
 		schedule_data["snap_frequency"] = snap_frequency
 	}
 
-	pgroup, err = client.Protectiongroups.SetProtectiongroup(p.(string), schedule_data)
-	if err != nil {
+	if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), schedule_data); err != nil {
 		return err
 	}
+	d.SetPartial("replicate_at")
+	d.SetPartial("replicate_blackout")
+	d.SetPartial("replicate_frequency")
+	d.SetPartial("snap_at")
+	d.SetPartial("snap_frequency")
 
 	if replicate_enabled, ok := d.GetOk("replicate_enabled"); ok {
 		if replicate_enabled.(bool) {
-			_, err = client.Protectiongroups.EnablePgroupReplication(p.(string))
-			if err != nil {
+			if _, err = client.Protectiongroups.EnablePgroupReplication(d.Id()); err != nil {
 				return err
 			}
 		} else {
-			_, err = client.Protectiongroups.DisablePgroupReplication(p.(string))
-			if err != nil {
+			if _, err = client.Protectiongroups.DisablePgroupReplication(d.Id()); err != nil {
 				return err
 			}
 		}
 	}
+	d.SetPartial("replicate_enabled")
 
 	if snap_enabled, ok := d.GetOk("snap_enabled"); ok {
 		if snap_enabled.(bool) {
-			_, err = client.Protectiongroups.EnablePgroupSnapshots(p.(string))
-			if err != nil {
+			if _, err = client.Protectiongroups.EnablePgroupSnapshots(d.Id()); err != nil {
 				return err
 			}
 		} else {
-			_, err = client.Protectiongroups.DisablePgroupSnapshots(p.(string))
-			if err != nil {
+			if _, err = client.Protectiongroups.DisablePgroupSnapshots(d.Id()); err != nil {
 				return err
 			}
 		}
 	}
+	d.Partial(false)
 
-	d.SetId(pgroup.Name)
 	return resourcePureProtectiongroupRead(d, m)
 }
 
 func resourcePureProtectiongroupRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*flasharray.Client)
 
-	p, _ := client.Protectiongroups.GetProtectiongroup(d.Id(), nil)
+	var p *flasharray.Protectiongroup
 
-	if p == nil {
+	if p, _ = client.Protectiongroups.GetProtectiongroup(d.Id(), nil); p == nil {
 		d.SetId("")
 		return nil
 	}
@@ -318,193 +331,159 @@ func resourcePureProtectiongroupRead(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourcePureProtectiongroupUpdate(d *schema.ResourceData, m interface{}) error {
+	d.Partial(true)
+
+	var pgroup *flasharray.Protectiongroup
+	var err error
 	client := m.(*flasharray.Client)
 
-	pgroup, err := client.Protectiongroups.GetProtectiongroup(d.Id(), nil)
-	if err != nil {
-		return err
-	}
-
-	p, _ := d.GetOk("name")
-	if pgroup.Name != p.(string) {
-		pgroup, err = client.Protectiongroups.RenameProtectiongroup(pgroup.Name, p.(string))
-		if err != nil {
+	if d.HasChange("name") {
+		if pgroup, err = client.Protectiongroups.RenameProtectiongroup(pgroup.Name, d.Get("name").(string)); err != nil {
 			return err
 		}
 		d.SetId(pgroup.Name)
 	}
-
-	pgroup, err = client.Protectiongroups.GetProtectiongroup(d.Id(), nil)
+	d.SetPartial("name")
 
 	data := make(map[string]interface{})
-	if h, ok := d.GetOk("hosts"); ok {
+	if d.HasChange("hosts") {
 		var hosts []string
-		for _, element := range h.([]interface{}) {
+		for _, element := range d.Get("hosts").([]interface{}) {
 			hosts = append(hosts, element.(string))
 		}
-		if !sameStringSlice(pgroup.Hosts, hosts) {
-			data["hostlist"] = hosts
-		}
+		data["hostlist"] = hosts
 	}
 
-	if v, ok := d.GetOk("volumes"); ok {
+	if d.HasChange("volumes") {
 		var volumes []string
-		for _, element := range v.([]interface{}) {
+		for _, element := range d.Get("volumes").([]interface{}) {
 			volumes = append(volumes, element.(string))
 		}
-		if !sameStringSlice(pgroup.Volumes, volumes) {
-			data["vollist"] = volumes
-		}
+		data["vollist"] = volumes
 	}
 
-	if hg, ok := d.GetOk("hgroups"); ok {
+	if d.HasChange("hgroups") {
 		var hgroups []string
-		for _, element := range hg.([]interface{}) {
+		for _, element := range d.Get("hgroups").([]interface{}) {
 			hgroups = append(hgroups, element.(string))
 		}
-		if !sameStringSlice(pgroup.Hgroups, hgroups) {
-			data["hgrouplist"] = hgroups
-		}
+		data["hgrouplist"] = hgroups
 	}
 
-	if t, ok := d.GetOk("targets"); ok {
+	if d.HasChange("targets") {
 		var targets []string
-		for _, element := range t.([]interface{}) {
+		for _, element := range d.Get("targets").([]interface{}) {
 			targets = append(targets, element.(string))
 		}
-		if !reflect.DeepEqual(pgroup.Targets, targets) {
-			data["targetlist"] = targets
-		}
+		data["targetlist"] = targets
 	}
 
 	if len(data) > 0 {
-		pgroup, err = client.Protectiongroups.SetProtectiongroup(d.Id(), data)
-		if err != nil {
+		if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), data); err != nil {
 			return err
 		}
 	}
-
-	pgroup, err = client.Protectiongroups.GetProtectiongroup(d.Id(), map[string]string{"retention": "true"})
-	if err != nil {
-		return err
-	}
+	d.SetPartial("hosts")
+	d.SetPartial("volumes")
+	d.SetPartial("hgroups")
+	d.SetPartial("targets")
 
 	retention_data := make(map[string]interface{})
-	if all_for, ok := d.GetOk("all_for"); ok {
-		if pgroup.Allfor != all_for {
-			retention_data["all_for"] = all_for
-		}
+	if d.HasChange("all_for") {
+		retention_data["all_for"] = d.Get("all_for").(int)
 	}
 
-	if days, ok := d.GetOk("days"); ok {
-		if pgroup.Days != days {
-			retention_data["days"] = days
-		}
+	if d.HasChange("days") {
+		retention_data["days"] = d.Get("days").(int)
 	}
 
-	if per_day, ok := d.GetOk("per_day"); ok {
-		if pgroup.Perday != per_day {
-			retention_data["per_day"] = per_day
-		}
+	if d.HasChange("per_day") {
+		retention_data["per_day"] = d.Get("per_day").(int)
 	}
 
-	if target_all_for, ok := d.GetOk("target_all_for"); ok {
-		if pgroup.TargetAllfor != target_all_for {
-			retention_data["target_all_for"] = target_all_for
-		}
+	if d.HasChange("target_all_for") {
+		retention_data["target_all_for"] = d.Get("target_all_for").(int)
 	}
 
-	if target_days, ok := d.GetOk("target_days"); ok {
-		if pgroup.TargetDays != target_days {
-			retention_data["target_days"] = target_days
-		}
+	if d.HasChange("target_days") {
+		retention_data["target_days"] = d.Get("target_days").(int)
 	}
 
-	if target_per_day, ok := d.GetOk("target_per_day"); ok {
-		if pgroup.TargetPerDay != target_per_day {
-			retention_data["target_per_day"] = target_per_day
-		}
+	if d.HasChange("target_per_day") {
+		retention_data["target_per_day"] = d.Get("target_per_day").(int)
 	}
 
 	if len(retention_data) > 0 {
-		pgroup, err = client.Protectiongroups.SetProtectiongroup(p.(string), retention_data)
-		if err != nil {
+		if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), retention_data); err != nil {
 			return err
 		}
 	}
-
-	pgroup, err = client.Protectiongroups.GetProtectiongroup(d.Id(), map[string]string{"schedule": "true"})
-	if err != nil {
-		return err
-	}
+	d.SetPartial("all_for")
+	d.SetPartial("days")
+	d.SetPartial("per_day")
+	d.SetPartial("target_all_for")
+	d.SetPartial("target_days")
+	d.SetPartial("target_per_day")
 
 	schedule_data := make(map[string]interface{})
 
-	if replicate_at, ok := d.GetOk("replicate_at"); ok {
-		if pgroup.ReplicateAt != replicate_at {
-			schedule_data["replicate_at"] = replicate_at
-		}
+	if d.HasChange("replicate_at") {
+		schedule_data["replicate_at"] = d.Get("replicate_at").(int)
 	}
 
-	if replicate_blackout, ok := d.GetOk("replicate_blackout"); ok {
-		if !reflect.DeepEqual(pgroup.ReplicateBlackout, replicate_blackout) {
-			schedule_data["replicate_blackout"] = replicate_blackout
-		}
+	if d.HasChange("replicate_blackout") {
+		schedule_data["replicate_blackout"] = d.Get("replicate_blackout").([]interface{})
 	}
 
-	if replicate_frequency, ok := d.GetOk("replicate_frequency"); ok {
-		if pgroup.ReplicateFrequency != replicate_frequency {
-			schedule_data["replicate_frequency"] = replicate_frequency
-		}
+	if d.HasChange("replicate_frequency") {
+		schedule_data["replicate_frequency"] = d.Get("replicate_frequency").(int)
 	}
 
-	if snap_at, ok := d.GetOk("snap_at"); ok {
-		if pgroup.SnapAt != snap_at {
-			schedule_data["snap_at"] = snap_at
-		}
+	if d.HasChange("snap_at") {
+		schedule_data["snap_at"] = d.Get("snap_at").(int)
 	}
 
-	if snap_frequency, ok := d.GetOk("snap_frequency"); ok {
-		if pgroup.SnapFrequency != snap_frequency {
-			schedule_data["snap_frequency"] = snap_frequency
-		}
+	if d.HasChange("snap_frequency") {
+		schedule_data["snap_frequency"] = d.Get("snap_frequency").(int)
 	}
 
 	if len(schedule_data) > 0 {
-		pgroup, err = client.Protectiongroups.SetProtectiongroup(p.(string), schedule_data)
-		if err != nil {
+		if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), schedule_data); err != nil {
 			return err
 		}
 	}
+	d.SetPartial("replicate_at")
+	d.SetPartial("replicate_blackout")
+	d.SetPartial("replicate_frequency")
+	d.SetPartial("snap_at")
+	d.SetPartial("snap_frequency")
 
-	if replicate_enabled, ok := d.GetOk("replicate_enabled"); ok {
-		if replicate_enabled.(bool) {
-			_, err = client.Protectiongroups.EnablePgroupReplication(p.(string))
-			if err != nil {
+	if d.HasChange("replicate_enabled") {
+		if d.Get("replicate_enabled").(bool) {
+			if _, err = client.Protectiongroups.EnablePgroupReplication(d.Id()); err != nil {
 				return err
 			}
 		} else {
-			_, err = client.Protectiongroups.DisablePgroupReplication(p.(string))
-			if err != nil {
+			if _, err = client.Protectiongroups.DisablePgroupReplication(d.Id()); err != nil {
+				return err
+			}
+		}
+	}
+	d.SetPartial("replicate_enabled")
+
+	if d.HasChange("snap_enabled") {
+		if d.Get("snap_enabled").(bool) {
+			if _, err = client.Protectiongroups.EnablePgroupSnapshots(d.Id()); err != nil {
+				return err
+			}
+		} else {
+			if _, err = client.Protectiongroups.DisablePgroupSnapshots(d.Id()); err != nil {
 				return err
 			}
 		}
 	}
 
-	if snap_enabled, ok := d.GetOk("snap_enabled"); ok {
-		if snap_enabled.(bool) {
-			_, err = client.Protectiongroups.EnablePgroupSnapshots(p.(string))
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err = client.Protectiongroups.DisablePgroupSnapshots(p.(string))
-			if err != nil {
-				return err
-			}
-		}
-	}
-
+	d.Partial(false)
 	return resourcePureProtectiongroupRead(d, m)
 }
 

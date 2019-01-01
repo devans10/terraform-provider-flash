@@ -42,8 +42,9 @@ func resourcePureHostgroup() *schema.Resource {
 
 func resourcePureHostgroupCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*flasharray.Client)
+	var hgroup *flasharray.Hostgroup
+	var err error
 
-	v, _ := d.GetOk("name")
 	var hosts []string
 	if h, ok := d.GetOk("hosts"); ok {
 		for _, element := range h.([]interface{}) {
@@ -51,10 +52,12 @@ func resourcePureHostgroupCreate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 	data := map[string][]string{"hostlist": hosts}
-	hgroup, err := client.Hostgroups.CreateHostgroup(v.(string), data)
-	if err != nil {
+	if hgroup, err = client.Hostgroups.CreateHostgroup(d.Get("name").(string), data); err != nil {
 		return err
 	}
+	d.SetId(hgroup.Name)
+	d.SetPartial("name")
+	d.SetPartial("hosts")
 
 	var connected_volumes []string
 	if cv, ok := d.GetOk("connected_volumes"); ok {
@@ -72,7 +75,7 @@ func resourcePureHostgroupCreate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	d.SetId(hgroup.Name)
+	d.Partial(false)
 	return resourcePureHostgroupRead(d, m)
 }
 
@@ -99,56 +102,59 @@ func resourcePureHostgroupRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePureHostgroupUpdate(d *schema.ResourceData, m interface{}) error {
+	d.Partial(true)
 	client := m.(*flasharray.Client)
+	var h *flasharray.Hostgroup
+	var err error
 
-	v, _ := d.GetOk("name")
-	h, err := client.Hostgroups.RenameHostgroup(d.Id(), v.(string))
-	if err != nil {
-		return err
+	if d.HasChange("name") {
+		if h, err = client.Hostgroups.RenameHostgroup(d.Id(), d.Get("name").(string)); err != nil {
+			return err
+		}
+		d.SetId(h.Name)
 	}
+	d.SetPartial("name")
 
-	var hosts []string
-	if h, ok := d.GetOk("hosts"); ok {
-		for _, element := range h.([]interface{}) {
+	if d.HasChange("hosts") {
+		var hosts []string
+		for _, element := range d.Get("hosts").([]interface{}) {
 			hosts = append(hosts, element.(string))
 		}
+		data := map[string][]string{"hostlist": hosts}
+		if _, err = client.Hostgroups.SetHostgroup(d.Id(), data); err != nil {
+			return err
+		}
 	}
-	data := map[string][]string{"hostlist": hosts}
-	_, err = client.Hostgroups.SetHostgroup(v.(string), data)
-	if err != nil {
-		return err
-	}
+	d.SetPartial("hosts")
 
-	var connected_volumes []string
-	cv, _ := d.GetOk("connected_volumes")
-	for _, element := range cv.([]interface{}) {
-		connected_volumes = append(connected_volumes, element.(string))
-	}
-	var current_volumes []string
-	curvols, _ := client.Hostgroups.ListHostgroupConnections(d.Id())
-	for _, volume := range curvols {
-		current_volumes = append(current_volumes, volume.Vol)
-	}
+	if d.HasChange("connected_volumes") {
+		var connected_volumes []string
+		cv, _ := d.GetOk("connected_volumes")
+		for _, element := range cv.([]interface{}) {
+			connected_volumes = append(connected_volumes, element.(string))
+		}
+		var current_volumes []string
+		curvols, _ := client.Hostgroups.ListHostgroupConnections(d.Id())
+		for _, volume := range curvols {
+			current_volumes = append(current_volumes, volume.Vol)
+		}
 
-	if !sameStringSlice(connected_volumes, current_volumes) {
 		connect_volumes := difference(connected_volumes, current_volumes)
 		for _, volume := range connect_volumes {
-			_, err = client.Hostgroups.ConnectHostgroup(d.Id(), volume)
-			if err != nil {
+			if _, err = client.Hostgroups.ConnectHostgroup(d.Id(), volume); err != nil {
 				return err
 			}
 		}
 
 		disconnect_volumes := difference(current_volumes, connected_volumes)
 		for _, volume := range disconnect_volumes {
-			_, err = client.Hostgroups.DisconnectHostgroup(d.Id(), volume)
-			if err != nil {
+			if _, err = client.Hostgroups.DisconnectHostgroup(d.Id(), volume); err != nil {
 				return err
 			}
 		}
 	}
 
-	d.SetId(h.Name)
+	d.Partial(false)
 	return resourcePureHostgroupRead(d, m)
 }
 

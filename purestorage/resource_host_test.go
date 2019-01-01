@@ -73,6 +73,52 @@ func TestAccResourcePureHost_createWithVolume(t *testing.T) {
 	})
 }
 
+/*
+func TestAccResourcePureHost_createWithCHAP(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureHostDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureHostConfig_withCHAP(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "host_user", "myhostuser"),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "target_user", "mytargetuser"),
+					testAccCheckPureHostCHAP(testAccCheckPureHostResourceName, "host_user", "myhostuser", true),
+					testAccCheckPureHostCHAP(testAccCheckPureHostResourceName, "target_user", "mytargetuser", true),
+				),
+			},
+		},
+	})
+}
+*/
+
+func TestAccResourcePureHost_createWithPersonality(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureHostDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureHostConfig_withPersonality(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "personality", "aix"),
+					testAccCheckPureHostPersonality(testAccCheckPureHostResourceName, "aix", true),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourcePureHost_update(t *testing.T) {
 	rInt := rand.Int()
 
@@ -135,6 +181,66 @@ func TestAccResourcePureHost_update_AddandRemoveVolume(t *testing.T) {
 	})
 }
 
+/*
+func TestAccResourcePureHost_update_withCHAP(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureHostDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureHostConfig_basic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
+				),
+			},
+			{
+				Config: testAccCheckPureHostConfig_withCHAP(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "host_user", "myhostuser"),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "target_user", "mytargetuser"),
+					testAccCheckPureHostCHAP(testAccCheckPureHostResourceName, "host_user", "myhostuser", true),
+					testAccCheckPureHostCHAP(testAccCheckPureHostResourceName, "target_user", "mytargetuser", true),
+				),
+			},
+		},
+	})
+}
+*/
+
+func TestAccResourcePureHost_update_withPersonality(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureHostDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureHostConfig_basic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
+				),
+			},
+			{
+				Config: testAccCheckPureHostConfig_withPersonality(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "personality", "aix"),
+					testAccCheckPureHostPersonality(testAccCheckPureHostResourceName, "aix", true),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckPureHostDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*flasharray.Client)
 
@@ -143,7 +249,7 @@ func testAccCheckPureHostDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := client.Hosts.GetHost(rs.Primary.ID)
+		_, err := client.Hosts.GetHost(rs.Primary.ID, nil)
 		if err != nil {
 			return nil
 		} else {
@@ -167,7 +273,7 @@ func testAccCheckPureHostExists(n string, exists bool) resource.TestCheckFunc {
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name, ok := rs.Primary.Attributes["name"]
-		_, err := client.Hosts.GetHost(name)
+		_, err := client.Hosts.GetHost(name, nil)
 		if err != nil {
 			if exists {
 				return fmt.Errorf("host does not exist: %s", n)
@@ -191,7 +297,7 @@ func testAccCheckPureHostWWN(n string, wwn string, exists bool) resource.TestChe
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name, ok := rs.Primary.Attributes["name"]
-		h, err := client.Hosts.GetHost(name)
+		h, err := client.Hosts.GetHost(name, nil)
 		if err != nil {
 			return fmt.Errorf("host does not exist: %s", n)
 		}
@@ -235,6 +341,105 @@ func testAccCheckPureHostVolumeConnection(n string, volume string, exists bool) 
 		}
 		if exists {
 			return fmt.Errorf("Volume %s not connected to host.", volume)
+		}
+		return nil
+	}
+}
+
+func testAccCheckPureHostCHAP(n string, param string, value string, exists bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		client := testAccProvider.Meta().(*flasharray.Client)
+		name, ok := rs.Primary.Attributes["name"]
+		h, err := client.Hosts.GetHost(name, map[string]string{"chap": "true"})
+		if err != nil {
+			return fmt.Errorf("host does not exist: %s", n)
+		}
+
+		switch param {
+		case "host_password":
+			if h.HostPassword == value {
+				if exists {
+					return nil
+				}
+				return fmt.Errorf("%s is still set for host", param)
+			}
+			if exists {
+				return fmt.Errorf("%s not set for host.", param)
+			}
+			return nil
+		case "host_user":
+			if h.HostUser == value {
+				if exists {
+					return nil
+				}
+				return fmt.Errorf("%s is still set for host", param)
+			}
+			if exists {
+				return fmt.Errorf("%s not set for host.", param)
+			}
+			return nil
+		case "target_password":
+			if h.TargetPassword == value {
+				if exists {
+					return nil
+				}
+				return fmt.Errorf("%s is still set for host", param)
+			}
+			if exists {
+				return fmt.Errorf("%s not set for host.", param)
+			}
+			return nil
+		case "target_user":
+			if h.TargetUser == value {
+				if exists {
+					return nil
+				}
+				return fmt.Errorf("%s is still set for host", param)
+			}
+			if exists {
+				return fmt.Errorf("%s not set for host.", param)
+			}
+			return nil
+		default:
+			return fmt.Errorf("%s is not a valid CHAP parameter.", param)
+		}
+	}
+}
+
+func testAccCheckPureHostPersonality(n string, personality string, exists bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		client := testAccProvider.Meta().(*flasharray.Client)
+		name, ok := rs.Primary.Attributes["name"]
+		h, err := client.Hosts.GetHost(name, map[string]string{"personality": "true"})
+		if err != nil {
+			return fmt.Errorf("host does not exist: %s", n)
+		}
+		if personality == h.Personality {
+			if exists {
+				return nil
+			}
+			return fmt.Errorf("personality %s is still set for host.", personality)
+		}
+		if exists {
+			return fmt.Errorf("personality %s not set for host.", personality)
 		}
 		return nil
 	}
@@ -288,4 +493,21 @@ resource "purestorage_host" "tfhosttest" {
         wwn = ["0000999900009999"]
         connected_volumes = []
 }`, rInt, rInt)
+}
+
+func testAccCheckPureHostConfig_withCHAP(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_host" "tfhosttest" {
+	name = "tfhosttest%d"
+	host_user = "myhostuser"
+	target_user = "mytargetuser"
+}`, rInt)
+}
+
+func testAccCheckPureHostConfig_withPersonality(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_host" "tfhosttest" {
+        name = "tfhosttest%d"
+	personality = "aix"
+}`, rInt)
 }
