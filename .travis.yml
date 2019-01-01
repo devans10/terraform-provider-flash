@@ -22,9 +22,9 @@ script:
 - make vendor-status
 - make vet
 - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="{{.OS}}/terraform-provider-purestorage" -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
-- if [ "${LATEST}" = "true" ]; sha1sum windows/terraform-provider-purestorage.exe > terraform-provider-purestorage.windows.sha1; tar -xvzf terraform-provider-purestorage.windows.zip  windows/terraform-provider-purestorage; fi
-- if [ "${LATEST}" = "true" ]; sha1sum darwin/terraform-provider-purestorage > terraform-provider-purestorage.darwin.sha1; tar -xvzf terraform-provider-purestorage.darwin.zip  darwin/terraform-provider-purestorage; fi
-- if [ "${LATEST}" = "true" ]; sha1sum linux/terraform-provider-purestorage > terraform-provider-purestorage.linux.sha1; tar -xvzf terraform-provider-purestorage.linux.zip  linux/terraform-provider-purestorage; fi
+- if [ "${LATEST}" = "true" ]; sha1sum windows/terraform-provider-purestorage.exe > terraform-provider-purestorage.windows.sha1; tar -czf terraform-provider-purestorage.windows.tar.gz  windows/terraform-provider-purestorage; fi
+- if [ "${LATEST}" = "true" ]; sha1sum darwin/terraform-provider-purestorage > terraform-provider-purestorage.darwin.sha1; tar -czf terraform-provider-purestorage.darwin.tar.gz  darwin/terraform-provider-purestorage; fi
+- if [ "${LATEST}" = "true" ]; sha1sum linux/terraform-provider-purestorage > terraform-provider-purestorage.linux.sha1; tar -czf terraform-provider-purestorage.linux.tar.gz  linux/terraform-provider-purestorage; fi
 branches:
   only:
   - master
