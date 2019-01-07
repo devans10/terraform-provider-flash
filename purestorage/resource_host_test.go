@@ -327,7 +327,7 @@ func testAccCheckPureHostVolumeConnection(n string, volume string, exists bool) 
 
 		client := testAccProvider.Meta().(*flasharray.Client)
 		name, ok := rs.Primary.Attributes["name"]
-		volumes, err := client.Hosts.ListHostConnections(name)
+		volumes, err := client.Hosts.ListHostConnections(name, map[string]string{"private": "true"})
 		if err != nil {
 			return fmt.Errorf("host does not exist: %s", n)
 		}
@@ -477,8 +477,10 @@ resource "purestorage_volume" "tfhosttest-volume" {
 resource "purestorage_host" "tfhosttest" {
         name = "tfhosttest%d"
         wwn = ["0000999900009999"]
-	connected_volumes = ["${purestorage_volume.tfhosttest-volume.name}"]
-	depends_on = ["purestorage_volume.tfhosttest-volume"]
+	volume {
+		vol = "${purestorage_volume.tfhosttest-volume.name}"
+		lun = 1
+	}
 }`, rInt, rInt)
 }
 
@@ -491,7 +493,6 @@ resource "purestorage_volume" "tfhosttest-volume" {
 resource "purestorage_host" "tfhosttest" {
         name = "tfhosttest%d"
         wwn = ["0000999900009999"]
-        connected_volumes = []
 }`, rInt, rInt)
 }
 

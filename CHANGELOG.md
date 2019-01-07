@@ -1,3 +1,14 @@
+## 0.4.0
+
+BREAKING CHANGE:
+
+* changed resource/host to use a TypeSet volume, replacing connected_volumes
+* resource/host should will only manage private volumes (fixes #5)
+
+IMPROVEMENTS:
+
+* Updated go-purestorage library to v0.1.3
+
 ## 0.3.1
 
 FIXES:

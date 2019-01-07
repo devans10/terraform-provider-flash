@@ -92,13 +92,21 @@ func resourcePureHost() *schema.Resource {
 				Optional:    true,
 				Default:     "",
 			},
-			"connected_volumes": &schema.Schema{
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+			"volume": &schema.Schema{
+				Type:     schema.TypeSet,
 				Optional: true,
-				Default:  nil,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"vol": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"lun": {
+							Type:     schema.TypeInt,
+							Required: true,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -158,6 +166,7 @@ func resourcePureHostCreate(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	d.SetId(h.Name)
 	d.SetPartial("name")
 	d.SetPartial("wwn")
 	d.SetPartial("iqn")
@@ -200,17 +209,14 @@ func resourcePureHostCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetPartial("personality")
 
-	var connected_volumes []string
-	if cv, ok := d.GetOk("connected_volumes"); ok {
-		for _, element := range cv.([]interface{}) {
-			connected_volumes = append(connected_volumes, element.(string))
-		}
-	}
-
-	if connected_volumes != nil {
-		for _, volume := range connected_volumes {
-			_, err = client.Hosts.ConnectHost(h.Name, volume)
-			if err != nil {
+	if cv := d.Get("volume").(*schema.Set).List(); len(cv) > 0 {
+		for _, volume := range cv {
+			vol, _ := volume.(map[string]interface{})
+			data := make(map[string]interface{})
+			if vol["lun"] != 0 {
+				data["lun"] = vol["lun"].(int)
+			}
+			if _, err := client.Hosts.ConnectHost(h.Name, vol["vol"].(string), data); err != nil {
 				return err
 			}
 		}
@@ -218,7 +224,6 @@ func resourcePureHostCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.Partial(false)
 
-	d.SetId(h.Name)
 	return resourcePureHostRead(d, m)
 }
 
@@ -232,17 +237,16 @@ func resourcePureHostRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	var connected_volumes []string
-	cv, _ := client.Hosts.ListHostConnections(host.Name)
-	for _, volume := range cv {
-		connected_volumes = append(connected_volumes, volume.Vol)
+	if volumes, _ := client.Hosts.ListHostConnections(host.Name, map[string]string{"private": "true"}); volumes != nil {
+		if err := d.Set("volume", flattenVolume(volumes)); err != nil {
+			return err
+		}
 	}
 
 	d.Set("name", host.Name)
 	d.Set("iqn", host.Iqn)
 	d.Set("wwn", host.Wwn)
 	d.Set("nqn", host.Nqn)
-	d.Set("connected_volumes", connected_volumes)
 
 	host, _ = client.Hosts.GetHost(d.Id(), map[string]string{"preferred_array": "true"})
 	d.Set("preferred_array", host.PreferredArray)
@@ -360,29 +364,39 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetPartial("personality")
 
-	if d.HasChange("connected_volumes") {
-		var connected_volumes []string
-		cv, _ := d.GetOk("connected_volumes")
-		for _, element := range cv.([]interface{}) {
-			connected_volumes = append(connected_volumes, element.(string))
+	if d.HasChange("volume") {
+		o, n := d.GetChange("volume")
+		if o == nil {
+			o = new(schema.Set)
 		}
-		var current_volumes []string
-		curvols, _ := client.Hosts.ListHostConnections(d.Id())
-		for _, volume := range curvols {
-			current_volumes = append(current_volumes, volume.Vol)
+		if n == nil {
+			n = new(schema.Set)
 		}
 
-		connect_volumes := difference(connected_volumes, current_volumes)
-		for _, volume := range connect_volumes {
-			if _, err = client.Hosts.ConnectHost(d.Id(), volume); err != nil {
-				return err
+		os := o.(*schema.Set)
+		ns := n.(*schema.Set)
+		disconnect_volumes := os.Difference(ns).List()
+		connect_volumes := ns.Difference(os).List()
+
+		if len(connect_volumes) > 0 {
+			for _, volume := range connect_volumes {
+				data := make(map[string]interface{})
+				vol := volume.(map[string]interface{})
+				if vol["lun"] != 0 {
+					data["lun"] = vol["lun"].(int)
+				}
+				if _, err = client.Hosts.ConnectHost(d.Id(), vol["vol"].(string), data); err != nil {
+					return err
+				}
 			}
 		}
 
-		disconnect_volumes := difference(current_volumes, connected_volumes)
-		for _, volume := range disconnect_volumes {
-			if _, err = client.Hosts.DisconnectHost(d.Id(), volume); err != nil {
-				return err
+		if len(disconnect_volumes) > 0 {
+			for _, volume := range disconnect_volumes {
+				vol := volume.(map[string]interface{})
+				if _, err = client.Hosts.DisconnectHost(d.Id(), vol["vol"].(string)); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -394,24 +408,15 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 func resourcePureHostDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*flasharray.Client)
 
-	var connected_volumes []string
-	if cv, ok := d.GetOk("connected_volumes"); ok {
-		for _, element := range cv.([]interface{}) {
-			connected_volumes = append(connected_volumes, element.(string))
-		}
-	}
-	if connected_volumes != nil {
-		for _, volume := range connected_volumes {
-			_, err := client.Hosts.DisconnectHost(d.Id(), volume)
-			if err != nil {
-				return err
-			}
+	volumes := d.Get("volume").(*schema.Set).List()
+	for _, volume := range volumes {
+		vol := volume.(map[string]interface{})
+		if _, err := client.Hosts.DisconnectHost(d.Id(), vol["vol"].(string)); err != nil {
+			return err
 		}
 	}
 
-	_, err := client.Hosts.DeleteHost(d.Id())
-
-	if err != nil {
+	if _, err := client.Hosts.DeleteHost(d.Id()); err != nil {
 		return err
 	}
 
@@ -428,17 +433,16 @@ func resourcePureHostImport(d *schema.ResourceData, m interface{}) ([]*schema.Re
 		return nil, err
 	}
 
-	var connected_volumes []string
-	cv, _ := client.Hosts.ListHostConnections(host.Name)
-	for _, volume := range cv {
-		connected_volumes = append(connected_volumes, volume.Vol)
+	if volumes, _ := client.Hosts.ListHostConnections(host.Name, map[string]string{"private": "true"}); volumes != nil {
+		if err := d.Set("volume", flattenVolume(volumes)); err != nil {
+			return nil, err
+		}
 	}
 
 	d.Set("name", host.Name)
 	d.Set("iqn", host.Iqn)
 	d.Set("wwn", host.Wwn)
 	d.Set("nqn", host.Nqn)
-	d.Set("connected_volumes", connected_volumes)
 
 	host, _ = client.Hosts.GetHost(d.Id(), map[string]string{"preferred_array": "true"})
 	d.Set("preferred_array", host.PreferredArray)
