@@ -98,6 +98,25 @@ func TestAccResourcePureHost_createWithCHAP(t *testing.T) {
 }
 */
 
+func TestAccResourcePureHost_createWithPrivateAndSharedVolumes(t *testing.T) {
+	rInt := rand.Int()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPureHostDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckPureHostConfig_withPrivateAndSharedVolumes(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
+					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourcePureHost_createWithPersonality(t *testing.T) {
 	rInt := rand.Int()
 
@@ -511,4 +530,34 @@ resource "purestorage_host" "tfhosttest" {
         name = "tfhosttest%d"
 	personality = "aix"
 }`, rInt)
+}
+
+func testAccCheckPureHostConfig_withPrivateAndSharedVolumes(rInt int) string {
+	return fmt.Sprintf(`
+resource "purestorage_volume" "tfhosttest-private-volume" {
+	name = "tfhosttest-private-volume-%d"
+	size = 1024000000
+}
+
+resource "purestorage_volume" "tfhosttest-shared-volume" {
+        name = "tfhosttest-shared-volume-%d"
+        size = 1024000000
+}
+
+resource "purestorage_host" "tfhosttest" {
+	name = "tfhosttest%d"
+	volume {
+		vol = "${purestorage_volume.tfhosttest-private-volume.name}"
+		lun = 1
+	}
+}
+
+resource "purestorage_hostgroup" "tfhosttesthostgroup" {
+	name = "tfhosthostgroup%d"
+	hosts = ["${purestorage_host.tfhosttest.name}"]
+	volume {
+		vol = "${purestorage_volume.tfhosttest-shared-volume.name}"
+		lun = 250
+	}
+}`, rInt, rInt, rInt, rInt)
 }

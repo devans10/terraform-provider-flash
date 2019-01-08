@@ -97,7 +97,10 @@ Create a host
 ```
 resource "purestorage_host" "testhosttf" {
 	name = "testhosttf"
-	connected_volumes = ["testvol_tf"]
+	volume {
+		vol = "testvol_tf"
+		lun = 1
+	}
 }
 ```
 
@@ -106,7 +109,10 @@ Create a hostgroup
 resource "purestorage_hostgroup" "testhgrouptf" {
 	name = "testhgrouptf" 
 	hosts = ["testhosttf"]
-	connected_volumes = ["testvol_tf_copy"]
+	volume {
+		vol = "testvol_tf_copy"
+		lun = 250
+	}
 }
 ```
 
