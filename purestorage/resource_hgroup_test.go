@@ -14,6 +14,7 @@ const testAccCheckPureHostgroupResourceName = "purestorage_hostgroup.tfhostgroup
 
 // Create a hostgroup
 func TestAccResourcePureHostgroup_create(t *testing.T) {
+	rInt := rand.Int()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -21,7 +22,7 @@ func TestAccResourcePureHostgroup_create(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostgroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostgroupConfig(),
+				Config: testAccCheckPureHostgroupConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
 				),
@@ -31,6 +32,7 @@ func TestAccResourcePureHostgroup_create(t *testing.T) {
 }
 
 func TestAccResourcePureHostgroup_create_withHostlist(t *testing.T) {
+	rInt := rand.Int()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -38,10 +40,10 @@ func TestAccResourcePureHostgroup_create_withHostlist(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostgroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostgroupConfig_withHostlist(),
+				Config: testAccCheckPureHostgroupConfig_withHostlist(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
-					testAccCheckPureHostgroupHosts(testAccCheckPureHostgroupResourceName, "tfhostgrouptesthost", true),
+					testAccCheckPureHostgroupHosts(testAccCheckPureHostgroupResourceName, fmt.Sprintf("tfhostgrouptesthost%d", rInt), true),
 				),
 			},
 		},
@@ -60,7 +62,7 @@ func TestAccResourcePureHostgroup_create_withVolumes(t *testing.T) {
 				Config: testAccCheckPureHostgroupConfig_withVolumes(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
-					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", "tfhostgrouptest"),
+					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", fmt.Sprintf("tfhostgrouptest%d", rInt)),
 					testAccCheckPureHostgroupVolumes(testAccCheckPureHostgroupResourceName, fmt.Sprintf("tfhostgrouptest-volume-%d", rInt), true),
 				),
 			},
@@ -69,6 +71,7 @@ func TestAccResourcePureHostgroup_create_withVolumes(t *testing.T) {
 }
 
 func TestAccResourcePureHostgroup_update(t *testing.T) {
+	rInt := rand.Int()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -76,7 +79,7 @@ func TestAccResourcePureHostgroup_update(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostgroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostgroupConfig(),
+				Config: testAccCheckPureHostgroupConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
 				),
@@ -101,7 +104,7 @@ func TestAccResourcePureHostgroup_update_AddandRemoveVolume(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostgroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostgroupConfig(),
+				Config: testAccCheckPureHostgroupConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
 				),
@@ -110,7 +113,7 @@ func TestAccResourcePureHostgroup_update_AddandRemoveVolume(t *testing.T) {
 				Config: testAccCheckPureHostgroupConfig_withVolumes(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
-					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", "tfhostgrouptest"),
+					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", fmt.Sprintf("tfhostgrouptest%d", rInt)),
 					testAccCheckPureHostgroupVolumes(testAccCheckPureHostgroupResourceName, fmt.Sprintf("tfhostgrouptest-volume-%d", rInt), true),
 				),
 			},
@@ -118,7 +121,7 @@ func TestAccResourcePureHostgroup_update_AddandRemoveVolume(t *testing.T) {
 				Config: testAccCheckPureHostgroupConfig_withoutVolumes(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
-					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", "tfhostgrouptest"),
+					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", fmt.Sprintf("tfhostgrouptest%d", rInt)),
 					testAccCheckPureHostgroupVolumes(testAccCheckPureHostgroupResourceName, fmt.Sprintf("tfhostgrouptest-volume-%d", rInt), false),
 				),
 			},
@@ -233,23 +236,23 @@ func testAccCheckPureHostgroupVolumes(n string, volume string, exists bool) reso
 	}
 }
 
-func testAccCheckPureHostgroupConfig() string {
+func testAccCheckPureHostgroupConfig(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_hostgroup" "tfhostgrouptest" {
-        name = "tfhostgrouptest"
-}`)
+        name = "tfhostgrouptest%d"
+}`, rInt)
 }
 
-func testAccCheckPureHostgroupConfig_withHostlist() string {
+func testAccCheckPureHostgroupConfig_withHostlist(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_host" "tfhostgrouptesthost" {
-        name = "tfhostgrouptesthost"
+        name = "tfhostgrouptesthost%d"
 }
 
 resource "purestorage_hostgroup" "tfhostgrouptest" {
-        name = "tfhostgrouptest"
+        name = "tfhostgrouptest%d"
         hosts = ["${purestorage_host.tfhostgrouptesthost.name}"]
-}`)
+}`, rInt, rInt)
 }
 
 func testAccCheckPureHostgroupConfig_rename() string {
@@ -267,9 +270,12 @@ resource "purestorage_volume" "tfhostgrouptest-volume" {
 }
 
 resource "purestorage_hostgroup" "tfhostgrouptest" {
-        name = "tfhostgrouptest"
-	connected_volumes = ["${purestorage_volume.tfhostgrouptest-volume.name}"]
-}`, rInt)
+        name = "tfhostgrouptest%d"
+	volume {
+		vol = "${purestorage_volume.tfhostgrouptest-volume.name}"
+		lun = 250
+	}
+}`, rInt, rInt)
 }
 
 func testAccCheckPureHostgroupConfig_withoutVolumes(rInt int) string {
@@ -280,7 +286,6 @@ resource "purestorage_volume" "tfhostgrouptest-volume" {
 }
 
 resource "purestorage_hostgroup" "tfhostgrouptest" {
-        name = "tfhostgrouptest"
-        connected_volumes = []
-}`, rInt)
+        name = "tfhostgrouptest%d"
+}`, rInt, rInt)
 }
