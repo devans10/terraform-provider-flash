@@ -67,10 +67,10 @@ func resourcePureHostgroupCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetPartial("name")
 	d.SetPartial("hosts")
 
-	var connected_volumes []string
+	var connectedVolumes []string
 	if cv, ok := d.GetOk("connected_volumes"); ok {
 		for _, element := range cv.([]interface{}) {
-			connected_volumes = append(connected_volumes, element.(string))
+			connectedVolumes = append(connectedVolumes, element.(string))
 		}
 	}
 
@@ -149,11 +149,11 @@ func resourcePureHostgroupUpdate(d *schema.ResourceData, m interface{}) error {
 
 		os := o.(*schema.Set)
 		ns := n.(*schema.Set)
-		disconnect_volumes := os.Difference(ns).List()
-		connect_volumes := ns.Difference(os).List()
+		disconnectVolumes := os.Difference(ns).List()
+		connectVolumes := ns.Difference(os).List()
 
-		if len(connect_volumes) > 0 {
-			for _, volume := range connect_volumes {
+		if len(connectVolumes) > 0 {
+			for _, volume := range connectVolumes {
 				data := make(map[string]interface{})
 				vol := volume.(map[string]interface{})
 				if vol["lun"] != 0 {
@@ -165,8 +165,8 @@ func resourcePureHostgroupUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 
-		if len(disconnect_volumes) > 0 {
-			for _, volume := range disconnect_volumes {
+		if len(disconnectVolumes) > 0 {
+			for _, volume := range disconnectVolumes {
 				vol := volume.(map[string]interface{})
 				if _, err = client.Hostgroups.DisconnectHostgroup(d.Id(), vol["vol"].(string)); err != nil {
 					return err

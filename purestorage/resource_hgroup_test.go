@@ -40,7 +40,7 @@ func TestAccResourcePureHostgroup_create_withHostlist(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostgroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostgroupConfig_withHostlist(rInt),
+				Config: testAccCheckPureHostgroupConfigWithHostlist(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
 					testAccCheckPureHostgroupHosts(testAccCheckPureHostgroupResourceName, fmt.Sprintf("tfhostgrouptesthost%d", rInt), true),
@@ -59,7 +59,7 @@ func TestAccResourcePureHostgroup_create_withVolumes(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostgroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostgroupConfig_withVolumes(rInt),
+				Config: testAccCheckPureHostgroupConfigWithVolumes(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", fmt.Sprintf("tfhostgrouptest%d", rInt)),
@@ -85,7 +85,7 @@ func TestAccResourcePureHostgroup_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckPureHostgroupConfig_rename(),
+				Config: testAccCheckPureHostgroupConfigRename(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", "tfhostgrouptestrename"),
@@ -110,7 +110,7 @@ func TestAccResourcePureHostgroup_update_AddandRemoveVolume(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckPureHostgroupConfig_withVolumes(rInt),
+				Config: testAccCheckPureHostgroupConfigWithVolumes(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", fmt.Sprintf("tfhostgrouptest%d", rInt)),
@@ -118,7 +118,7 @@ func TestAccResourcePureHostgroup_update_AddandRemoveVolume(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckPureHostgroupConfig_withoutVolumes(rInt),
+				Config: testAccCheckPureHostgroupConfigWithoutVolumes(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostgroupExists(testAccCheckPureHostgroupResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostgroupResourceName, "name", fmt.Sprintf("tfhostgrouptest%d", rInt)),
@@ -140,9 +140,9 @@ func testAccCheckPureHostgroupDestroy(s *terraform.State) error {
 		_, err := client.Hostgroups.GetHostgroup(rs.Primary.ID, nil)
 		if err != nil {
 			return nil
-		} else {
-			return fmt.Errorf("hostgroup '%s' stil exists", rs.Primary.ID)
 		}
+		return fmt.Errorf("hostgroup '%s' stil exists", rs.Primary.ID)
+
 	}
 
 	return nil
@@ -194,10 +194,10 @@ func testAccCheckPureHostgroupHosts(n string, host string, exists bool) resource
 			if exists {
 				return nil
 			}
-			return fmt.Errorf("Host %s still a member of hostgroup.", host)
+			return fmt.Errorf("host %s still a member of hostgroup", host)
 		}
 		if exists {
-			return fmt.Errorf("Host %s not a member of hostgroup.", host)
+			return fmt.Errorf("host %s not a member of hostgroup", host)
 		}
 		return nil
 	}
@@ -226,11 +226,11 @@ func testAccCheckPureHostgroupVolumes(n string, volume string, exists bool) reso
 				if exists {
 					return nil
 				}
-				return fmt.Errorf("Volume %s still connected to hostgroup.", volume)
+				return fmt.Errorf("volume %s still connected to hostgroup", volume)
 			}
 		}
 		if exists {
-			return fmt.Errorf("Volume %s not connected to hostgroup.", volume)
+			return fmt.Errorf("volume %s not connected to hostgroup", volume)
 		}
 		return nil
 	}
@@ -243,7 +243,7 @@ resource "purestorage_hostgroup" "tfhostgrouptest" {
 }`, rInt)
 }
 
-func testAccCheckPureHostgroupConfig_withHostlist(rInt int) string {
+func testAccCheckPureHostgroupConfigWithHostlist(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_host" "tfhostgrouptesthost" {
         name = "tfhostgrouptesthost%d"
@@ -255,14 +255,14 @@ resource "purestorage_hostgroup" "tfhostgrouptest" {
 }`, rInt, rInt)
 }
 
-func testAccCheckPureHostgroupConfig_rename() string {
+func testAccCheckPureHostgroupConfigRename() string {
 	return fmt.Sprintf(`
 resource "purestorage_hostgroup" "tfhostgrouptest" {
         name = "tfhostgrouptestrename"
 }`)
 }
 
-func testAccCheckPureHostgroupConfig_withVolumes(rInt int) string {
+func testAccCheckPureHostgroupConfigWithVolumes(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfhostgrouptest-volume" {
 	name = "tfhostgrouptest-volume-%d"
@@ -278,7 +278,7 @@ resource "purestorage_hostgroup" "tfhostgrouptest" {
 }`, rInt, rInt)
 }
 
-func testAccCheckPureHostgroupConfig_withoutVolumes(rInt int) string {
+func testAccCheckPureHostgroupConfigWithoutVolumes(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfhostgrouptest-volume" {
         name = "tfhostgrouptest-volume-%d"

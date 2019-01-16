@@ -148,11 +148,11 @@ func resourcePureHostCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if pa, ok := d.GetOk("preferred_array"); ok {
-		var preferred_array []string
+		var preferredArray []string
 		for _, element := range pa.([]interface{}) {
-			preferred_array = append(preferred_array, element.(string))
+			preferredArray = append(preferredArray, element.(string))
 		}
-		data["preferred_array"] = preferred_array
+		data["preferred_array"] = preferredArray
 	}
 
 	if len(data) > 0 {
@@ -173,25 +173,25 @@ func resourcePureHostCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetPartial("nqn")
 	d.SetPartial("preferred_array")
 
-	chap_details := make(map[string]interface{})
-	if host_password, ok := d.GetOk("host_password"); ok {
-		chap_details["host_password"] = host_password.(string)
+	chapDetails := make(map[string]interface{})
+	if hostPassword, ok := d.GetOk("host_password"); ok {
+		chapDetails["host_password"] = hostPassword.(string)
 	}
 
-	if host_user, ok := d.GetOk("host_user"); ok {
-		chap_details["host_user"] = host_user.(string)
+	if hostUser, ok := d.GetOk("host_user"); ok {
+		chapDetails["host_user"] = hostUser.(string)
 	}
 
-	if target_password, ok := d.GetOk("target_password"); ok {
-		chap_details["target_password"] = target_password.(string)
+	if targetPassword, ok := d.GetOk("target_password"); ok {
+		chapDetails["target_password"] = targetPassword.(string)
 	}
 
-	if target_user, ok := d.GetOk("target_user"); ok {
-		chap_details["target_user"] = target_user.(string)
+	if targetUser, ok := d.GetOk("target_user"); ok {
+		chapDetails["target_user"] = targetUser.(string)
 	}
 
-	if len(chap_details) > 0 {
-		h, err = client.Hosts.SetHost(h.Name, chap_details)
+	if len(chapDetails) > 0 {
+		h, err = client.Hosts.SetHost(h.Name, chapDetails)
 		if err != nil {
 			return err
 		}
@@ -317,38 +317,38 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 	d.SetPartial("nqn")
 
 	if d.HasChange("preferred_array") {
-		var preferred_array []string
+		var preferredArray []string
 		pa, _ := d.GetOk("preferred_array")
 		for _, element := range pa.([]interface{}) {
-			preferred_array = append(preferred_array, element.(string))
+			preferredArray = append(preferredArray, element.(string))
 		}
-		data := map[string]interface{}{"preferred_array": preferred_array}
+		data := map[string]interface{}{"preferred_array": preferredArray}
 		if _, err = client.Hosts.SetHost(d.Id(), data); err != nil {
 			return err
 		}
 	}
 	d.SetPartial("preferred_array")
 
-	chap_details := make(map[string]interface{})
+	chapDetails := make(map[string]interface{})
 
 	if d.HasChange("host_password") {
-		chap_details["host_password"] = d.Get("host_password").(string)
+		chapDetails["host_password"] = d.Get("host_password").(string)
 	}
 
 	if d.HasChange("host_user") {
-		chap_details["host_user"] = d.Get("host_user").(string)
+		chapDetails["host_user"] = d.Get("host_user").(string)
 	}
 
 	if d.HasChange("target_password") {
-		chap_details["target_password"] = d.Get("target_password").(string)
+		chapDetails["target_password"] = d.Get("target_password").(string)
 	}
 
 	if d.HasChange("target_user") {
-		chap_details["target_user"] = d.Get("target_user").(string)
+		chapDetails["target_user"] = d.Get("target_user").(string)
 	}
 
-	if len(chap_details) > 0 {
-		if _, err = client.Hosts.SetHost(d.Id(), chap_details); err != nil {
+	if len(chapDetails) > 0 {
+		if _, err = client.Hosts.SetHost(d.Id(), chapDetails); err != nil {
 			return err
 		}
 	}
@@ -375,11 +375,11 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 
 		os := o.(*schema.Set)
 		ns := n.(*schema.Set)
-		disconnect_volumes := os.Difference(ns).List()
-		connect_volumes := ns.Difference(os).List()
+		disconnectVolumes := os.Difference(ns).List()
+		connectVolumes := ns.Difference(os).List()
 
-		if len(connect_volumes) > 0 {
-			for _, volume := range connect_volumes {
+		if len(connectVolumes) > 0 {
+			for _, volume := range connectVolumes {
 				data := make(map[string]interface{})
 				vol := volume.(map[string]interface{})
 				if vol["lun"] != 0 {
@@ -391,8 +391,8 @@ func resourcePureHostUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 
-		if len(disconnect_volumes) > 0 {
-			for _, volume := range disconnect_volumes {
+		if len(disconnectVolumes) > 0 {
+			for _, volume := range disconnectVolumes {
 				vol := volume.(map[string]interface{})
 				if _, err = client.Hosts.DisconnectHost(d.Id(), vol["vol"].(string)); err != nil {
 					return err

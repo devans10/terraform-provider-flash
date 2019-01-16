@@ -139,7 +139,7 @@ func resourcePureVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 		if z.(int) < oldVol.Size {
-			return fmt.Errorf("Error: New size must be larger than current size. Truncating volumes not supported.")
+			return fmt.Errorf("error: New size must be larger than current size. Truncating volumes not supported")
 		}
 	}
 	d.Partial(false)

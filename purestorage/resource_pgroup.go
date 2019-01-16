@@ -193,32 +193,32 @@ func resourcePureProtectiongroupCreate(d *schema.ResourceData, m interface{}) er
 	d.SetPartial("hgroups")
 	d.SetPartial("targets")
 
-	retention_data := make(map[string]interface{})
-	if all_for, ok := d.GetOk("all_for"); ok {
-		retention_data["all_for"] = all_for
+	retentionData := make(map[string]interface{})
+	if allFor, ok := d.GetOk("all_for"); ok {
+		retentionData["all_for"] = allFor
 	}
 
 	if days, ok := d.GetOk("days"); ok {
-		retention_data["days"] = days
+		retentionData["days"] = days
 	}
 
-	if per_day, ok := d.GetOk("per_day"); ok {
-		retention_data["per_day"] = per_day
+	if perDay, ok := d.GetOk("per_day"); ok {
+		retentionData["per_day"] = perDay
 	}
 
-	if target_all_for, ok := d.GetOk("target_all_for"); ok {
-		retention_data["target_all_for"] = target_all_for
+	if targetAllFor, ok := d.GetOk("target_all_for"); ok {
+		retentionData["target_all_for"] = targetAllFor
 	}
 
-	if target_days, ok := d.GetOk("target_days"); ok {
-		retention_data["target_days"] = target_days
+	if targetDays, ok := d.GetOk("target_days"); ok {
+		retentionData["target_days"] = targetDays
 	}
 
-	if target_per_day, ok := d.GetOk("target_per_day"); ok {
-		retention_data["target_per_day"] = target_per_day
+	if targetPerDay, ok := d.GetOk("target_per_day"); ok {
+		retentionData["target_per_day"] = targetPerDay
 	}
 
-	if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), retention_data); err != nil {
+	if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), retentionData); err != nil {
 		return err
 	}
 	d.SetPartial("all_for")
@@ -228,29 +228,29 @@ func resourcePureProtectiongroupCreate(d *schema.ResourceData, m interface{}) er
 	d.SetPartial("target_days")
 	d.SetPartial("target_per_day")
 
-	schedule_data := make(map[string]interface{})
+	scheduleData := make(map[string]interface{})
 
-	if replicate_at, ok := d.GetOk("replicate_at"); ok {
-		schedule_data["replicate_at"] = replicate_at
+	if replicateAt, ok := d.GetOk("replicate_at"); ok {
+		scheduleData["replicate_at"] = replicateAt
 	}
 
-	if replicate_blackout, ok := d.GetOk("replicate_blackout"); ok {
-		schedule_data["replicate_blackout"] = replicate_blackout
+	if replicateBlackout, ok := d.GetOk("replicate_blackout"); ok {
+		scheduleData["replicate_blackout"] = replicateBlackout
 	}
 
-	if replicate_frequency, ok := d.GetOk("replicate_frequency"); ok {
-		schedule_data["replicate_frequency"] = replicate_frequency
+	if replicateFrequency, ok := d.GetOk("replicate_frequency"); ok {
+		scheduleData["replicate_frequency"] = replicateFrequency
 	}
 
-	if snap_at, ok := d.GetOk("snap_at"); ok {
-		schedule_data["snap_at"] = snap_at
+	if snapAt, ok := d.GetOk("snap_at"); ok {
+		scheduleData["snap_at"] = snapAt
 	}
 
-	if snap_frequency, ok := d.GetOk("snap_frequency"); ok {
-		schedule_data["snap_frequency"] = snap_frequency
+	if snapFrequency, ok := d.GetOk("snap_frequency"); ok {
+		scheduleData["snap_frequency"] = snapFrequency
 	}
 
-	if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), schedule_data); err != nil {
+	if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), scheduleData); err != nil {
 		return err
 	}
 	d.SetPartial("replicate_at")
@@ -259,8 +259,8 @@ func resourcePureProtectiongroupCreate(d *schema.ResourceData, m interface{}) er
 	d.SetPartial("snap_at")
 	d.SetPartial("snap_frequency")
 
-	if replicate_enabled, ok := d.GetOk("replicate_enabled"); ok {
-		if replicate_enabled.(bool) {
+	if replicateEnabled, ok := d.GetOk("replicate_enabled"); ok {
+		if replicateEnabled.(bool) {
 			if _, err = client.Protectiongroups.EnablePgroupReplication(d.Id()); err != nil {
 				return err
 			}
@@ -272,8 +272,8 @@ func resourcePureProtectiongroupCreate(d *schema.ResourceData, m interface{}) er
 	}
 	d.SetPartial("replicate_enabled")
 
-	if snap_enabled, ok := d.GetOk("snap_enabled"); ok {
-		if snap_enabled.(bool) {
+	if snapEnabled, ok := d.GetOk("snap_enabled"); ok {
+		if snapEnabled.(bool) {
 			if _, err = client.Protectiongroups.EnablePgroupSnapshots(d.Id()); err != nil {
 				return err
 			}
@@ -388,33 +388,33 @@ func resourcePureProtectiongroupUpdate(d *schema.ResourceData, m interface{}) er
 	d.SetPartial("hgroups")
 	d.SetPartial("targets")
 
-	retention_data := make(map[string]interface{})
+	retentionData := make(map[string]interface{})
 	if d.HasChange("all_for") {
-		retention_data["all_for"] = d.Get("all_for").(int)
+		retentionData["all_for"] = d.Get("all_for").(int)
 	}
 
 	if d.HasChange("days") {
-		retention_data["days"] = d.Get("days").(int)
+		retentionData["days"] = d.Get("days").(int)
 	}
 
 	if d.HasChange("per_day") {
-		retention_data["per_day"] = d.Get("per_day").(int)
+		retentionData["per_day"] = d.Get("per_day").(int)
 	}
 
 	if d.HasChange("target_all_for") {
-		retention_data["target_all_for"] = d.Get("target_all_for").(int)
+		retentionData["target_all_for"] = d.Get("target_all_for").(int)
 	}
 
 	if d.HasChange("target_days") {
-		retention_data["target_days"] = d.Get("target_days").(int)
+		retentionData["target_days"] = d.Get("target_days").(int)
 	}
 
 	if d.HasChange("target_per_day") {
-		retention_data["target_per_day"] = d.Get("target_per_day").(int)
+		retentionData["target_per_day"] = d.Get("target_per_day").(int)
 	}
 
-	if len(retention_data) > 0 {
-		if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), retention_data); err != nil {
+	if len(retentionData) > 0 {
+		if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), retentionData); err != nil {
 			return err
 		}
 	}
@@ -425,30 +425,30 @@ func resourcePureProtectiongroupUpdate(d *schema.ResourceData, m interface{}) er
 	d.SetPartial("target_days")
 	d.SetPartial("target_per_day")
 
-	schedule_data := make(map[string]interface{})
+	scheduleData := make(map[string]interface{})
 
 	if d.HasChange("replicate_at") {
-		schedule_data["replicate_at"] = d.Get("replicate_at").(int)
+		scheduleData["replicate_at"] = d.Get("replicate_at").(int)
 	}
 
 	if d.HasChange("replicate_blackout") {
-		schedule_data["replicate_blackout"] = d.Get("replicate_blackout").([]interface{})
+		scheduleData["replicate_blackout"] = d.Get("replicate_blackout").([]interface{})
 	}
 
 	if d.HasChange("replicate_frequency") {
-		schedule_data["replicate_frequency"] = d.Get("replicate_frequency").(int)
+		scheduleData["replicate_frequency"] = d.Get("replicate_frequency").(int)
 	}
 
 	if d.HasChange("snap_at") {
-		schedule_data["snap_at"] = d.Get("snap_at").(int)
+		scheduleData["snap_at"] = d.Get("snap_at").(int)
 	}
 
 	if d.HasChange("snap_frequency") {
-		schedule_data["snap_frequency"] = d.Get("snap_frequency").(int)
+		scheduleData["snap_frequency"] = d.Get("snap_frequency").(int)
 	}
 
-	if len(schedule_data) > 0 {
-		if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), schedule_data); err != nil {
+	if len(scheduleData) > 0 {
+		if _, err = client.Protectiongroups.SetProtectiongroup(d.Id(), scheduleData); err != nil {
 			return err
 		}
 	}

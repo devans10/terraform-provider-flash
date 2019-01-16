@@ -13,15 +13,15 @@ import (
 // Either the Username and Password or the API Token should be provided,
 // but not both.
 type Config struct {
-	Username       string
-	Password       string
-	Target         string
-	ApiToken       string
-	Rest_version   string
-	Verify_https   bool
-	Ssl_cert       bool
-	User_agent     string
-	Request_kwargs map[string]string
+	Username      string
+	Password      string
+	Target        string
+	APIToken      string
+	RestVersion   string
+	VerifyHTTPS   bool
+	SslCert       bool
+	UserAgent     string
+	RequestKwargs map[string]string
 }
 
 // NewConfig returns a new Config from a supplied ResourceData.
@@ -41,35 +41,35 @@ func NewConfig(d *schema.ResourceData) (*Config, error) {
 		return nil, fmt.Errorf("Password must be provided with Username")
 	}
 
-	request_kwargs := make(map[string]string)
+	requestKwargs := make(map[string]string)
 
 	for key, value := range d.Get("request_kwargs").(map[string]interface{}) {
 		strKey := fmt.Sprintf("%v", key)
 		strValue := fmt.Sprintf("%v", value)
 
-		request_kwargs[strKey] = strValue
+		requestKwargs[strKey] = strValue
 	}
 
 	c := &Config{
-		Username:       username,
-		Password:       password,
-		Target:         d.Get("target").(string),
-		ApiToken:       apitoken,
-		Rest_version:   d.Get("rest_version").(string),
-		Verify_https:   d.Get("verify_https").(bool),
-		Ssl_cert:       d.Get("ssl_cert").(bool),
-		User_agent:     d.Get("user_agent").(string),
-		Request_kwargs: request_kwargs,
+		Username:      username,
+		Password:      password,
+		Target:        d.Get("target").(string),
+		APIToken:      apitoken,
+		RestVersion:   d.Get("rest_version").(string),
+		VerifyHTTPS:   d.Get("verify_https").(bool),
+		SslCert:       d.Get("ssl_cert").(bool),
+		UserAgent:     d.Get("user_agent").(string),
+		RequestKwargs: requestKwargs,
 	}
 
 	return c, nil
 }
 
-// Client() returns a new client for accessing flasharray.
+// Client returns a new client for accessing flasharray.
 //
 func (c *Config) Client() (*flasharray.Client, error) {
 
-	client, err := flasharray.NewClient(c.Target, c.Username, c.Password, c.ApiToken, c.Rest_version, c.Verify_https, c.Ssl_cert, c.User_agent, c.Request_kwargs)
+	client, err := flasharray.NewClient(c.Target, c.Username, c.Password, c.APIToken, c.RestVersion, c.VerifyHTTPS, c.SslCert, c.UserAgent, c.RequestKwargs)
 	if err != nil {
 		return nil, err
 	}

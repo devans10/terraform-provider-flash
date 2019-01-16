@@ -54,7 +54,7 @@ func TestAccResourcePureVolume_clone(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckPureVolumeConfig_clone(rInt),
+				Config: testAccCheckPureVolumeConfigClone(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureVolumeExists(testAccCheckPureVolumeCloneResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureVolumeCloneResourceName, "source", fmt.Sprintf("tfvolumetest-%d", rInt)),
@@ -82,7 +82,7 @@ func TestAccResourcePureVolume_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckPureVolumeConfig_resize(rInt),
+				Config: testAccCheckPureVolumeConfigResize(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureVolumeExists(testAccCheckPureVolumeResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "name", fmt.Sprintf("tfvolumetest-%d", rInt)),
@@ -91,7 +91,7 @@ func TestAccResourcePureVolume_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckPureVolumeConfig_rename(rInt),
+				Config: testAccCheckPureVolumeConfigRename(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureVolumeExists(testAccCheckPureVolumeResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "name", fmt.Sprintf("tfvolumetest-rename-%d", rInt)),
@@ -114,9 +114,8 @@ func testAccCheckPureVolumeDestroy(s *terraform.State) error {
 		_, err := client.Volumes.GetVolume(rs.Primary.ID, nil)
 		if err != nil {
 			return nil
-		} else {
-			return fmt.Errorf("volume '%s' stil exists", rs.Primary.ID)
 		}
+		return fmt.Errorf("volume '%s' stil exists", rs.Primary.ID)
 	}
 
 	return nil
@@ -153,7 +152,7 @@ resource "purestorage_volume" "tfvolumetest" {
 }`, rInt)
 }
 
-func testAccCheckPureVolumeConfig_clone(rInt int) string {
+func testAccCheckPureVolumeConfigClone(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfvolumetest" {
         name = "tfvolumetest-%d"
@@ -166,7 +165,7 @@ resource "purestorage_volume" "tfclonevolumetest" {
 }`, rInt, rInt)
 }
 
-func testAccCheckPureVolumeConfig_resize(rInt int) string {
+func testAccCheckPureVolumeConfigResize(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfvolumetest" {
 	name = "tfvolumetest-%d"
@@ -174,7 +173,7 @@ resource "purestorage_volume" "tfvolumetest" {
 }`, rInt)
 }
 
-func testAccCheckPureVolumeConfig_rename(rInt int) string {
+func testAccCheckPureVolumeConfigRename(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfvolumetest" {
         name = "tfvolumetest-rename-%d"
