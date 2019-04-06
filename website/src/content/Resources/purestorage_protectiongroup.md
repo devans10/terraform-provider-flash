@@ -4,7 +4,7 @@ date: 2019-03-22T21:20:11-04:00
 lastmod: 2019-03-22T21:20:11-04:00
 draft: false
 description: ""
-weight: 5
+weight: 3
 ---
 
 Provides a Pure Storage Protection Group resource.

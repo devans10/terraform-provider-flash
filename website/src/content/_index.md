@@ -9,7 +9,7 @@ weight: 5
 
 # Pure Storage Provider
 
-The Pure Storage provider is used to interact with the resources supported by the Pure Storage Flasharray.  The provider needs to be configured with the proper credentials before it can be used.
+The Pure Storage provider is used to interact with the resources supported by the Pure Storage FlashArray.  The provider needs to be configured with the proper credentials before it can be used.
 
 This is an open source community project and is not affiliated with the Pure Storage or HashiCorp companies.
 

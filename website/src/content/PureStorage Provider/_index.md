@@ -4,10 +4,10 @@ date: 2019-03-22T20:49:09-04:00
 lastmod: 2019-03-22T20:49:09-04:00
 draft: false
 description: ""
-weight: 5
+weight: 2
 ---
 
-The Pure Storage provider is used to interact with the resources supported by the Pure Storage Flasharray.  The provider needs to be configured with the proper credentials before it can be used.
+The Pure Storage provider is used to interact with the resources supported by the Pure Storage FlashArray.  The provider needs to be configured with the proper credentials before it can be used.
 
 ## Example Usage
 
@@ -17,7 +17,7 @@ The Pure Storage provider is used to interact with the resources supported by th
 variable "purestorage_target" {}
 variable "purestorage_apitoken" {}
 
-# Configure the Purestorage Provider
+# Configure the Pure Storage Provider
 provider "purestorage" {
   target = "${var.purestorage_target}"
   api_token = "${var.purestorage_apitoken}"

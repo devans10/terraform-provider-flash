@@ -7,11 +7,11 @@ description: ""
 weight: 5
 ---
 
-Get information on a flasharray.  This data source provides the name, version, revision of a flasharray.  This is useful if the flasharray is not managed by Terraform, or you need to utilize any of the flasharray data.
+Get information on a FlashArray.  This data source provides the name, version, revision of a FlashArray.  This is useful if the FlashArray is not managed by Terraform, or you need to utilize any of the FlashArray data.
 
 ## Example Usage
 
-Get the flasharray
+Get the FlashArray
 
 ```
 data "purestorage_flasharray" "example" {
@@ -23,12 +23,12 @@ data "purestorage_flasharray" "example" {
 
 The following arguements are supported:
 
-+ name - (Required) The name of the flasharray
++ name - (Required) The name of the FlashArray
 
 ## Attribute Reference
 
 The following attributes are exported:
 
-+ `name`: Name of the flasharray
-+ `revision`: Revision of the flasharray
-+ `version`: The version of the flasharray
++ `name`: Name of the FlashArray
++ `revision`: Revision of the FlashArray
++ `version`: The version of the FlashArray

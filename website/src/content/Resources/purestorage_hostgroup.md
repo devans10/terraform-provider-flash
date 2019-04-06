@@ -4,7 +4,7 @@ date: 2019-03-22T21:19:24-04:00
 lastmod: 2019-03-22T21:19:24-04:00
 draft: false
 description: ""
-weight: 5
+weight: 2
 ---
 
 Provides a Pure Storage hostgroup resource.
