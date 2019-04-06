@@ -1,7 +1,7 @@
 ---
-title: "PureStorage Provider"
+title: "Pure Storage Provider"
 date: 2019-03-22T20:49:09-04:00
-lastmod: 2019-03-22T20:49:09-04:00
+lastmod: 2019-04-06T09:33:09-04:00
 draft: false
 description: ""
 weight: 2
