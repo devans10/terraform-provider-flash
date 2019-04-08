@@ -1,4 +1,4 @@
-Purestorage Terraform Provider 
+Pure Storage Terraform Provider 
 ==================
 [![Build Status](https://travis-ci.com/devans10/terraform-provider-purestorage.svg?branch=master)](https://travis-ci.com/devans10/terraform-provider-purestorage)
 
