@@ -2,9 +2,11 @@ Pure Storage Terraform Provider
 ==================
 [![Build Status](https://travis-ci.com/devans10/terraform-provider-purestorage.svg?branch=master)](https://travis-ci.com/devans10/terraform-provider-purestorage)
 
-This is the repository for the Terraform Pure Storage Provider.  The plugin provides resources for the Pure Storage FlashArray to be managed within Terraform.
+This is the repository for the Pure Storage Terraform Provider.  The plugin provides resources for the Pure Storage FlashArray to be managed within Terraform.
 
 For general information about Terraform, visit the [official website](https://terraform.io) and the [GitHub project page.](https://github.com/hashicorp/terraform)
+
+The documentation for the provider can be found on the [Provider's website](https://www.terraform-purestorage.com)
 
 This provider plugin is maintained by Dave Evans.
 
