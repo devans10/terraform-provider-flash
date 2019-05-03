@@ -18,7 +18,7 @@ enableMissingTranslationPlaceholders = false
 [Params]
 
     # Souce Code repository section
-    description = "Terraform Provider for Pure Storage Flasharray"
+    description = "Terraform Provider for Pure Storage Flash Array"
     github_repository = "https://github.com/devans10/terraform-provider-purestorage"
     version = "0.4.0"
 
