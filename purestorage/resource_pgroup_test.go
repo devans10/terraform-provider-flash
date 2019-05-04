@@ -1,3 +1,19 @@
+/*
+   Copyright 2018 David Evans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
 package purestorage
 
 import (
@@ -5,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/devans10/go-purestorage/flasharray"
+	"github.com/devans10/pugo/flasharray"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -22,7 +38,7 @@ func TestAccResourcePureProtectiongroup_create(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Config: testAccCheckPureProtectiongroupConfigBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 				),
@@ -40,7 +56,7 @@ func TestAccResourcePureProtectiongroup_create_withHosts(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_withHosts(rInt),
+				Config: testAccCheckPureProtectiongroupConfigWithHosts(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 					testAccCheckPureHostExists("purestorage_host.tfpgrouptesthost", true),
@@ -60,7 +76,7 @@ func TestAccResourcePureProtectiongroup_create_withHostgroups(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_withHostgroups(rInt),
+				Config: testAccCheckPureProtectiongroupConfigWithHostgroups(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 					testAccCheckPureHostgroupExists("purestorage_hostgroup.tfpgrouptesthgroup", true),
@@ -80,7 +96,7 @@ func TestAccResourcePureProtectiongroup_create_withVolumes(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_withVolumes(rInt),
+				Config: testAccCheckPureProtectiongroupConfigWithVolumes(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 					testAccCheckPureVolumeExists("purestorage_volume.tfpgrouptest-volume", true),
@@ -100,7 +116,7 @@ func TestAccResourcePureProtectiongroup_create_withSchedule(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_withSchedule(rInt),
+				Config: testAccCheckPureProtectiongroupConfigWithSchedule(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 				),
@@ -118,7 +134,7 @@ func TestAccResourcePureProtectiongroup_create_withRetention(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_withRetention(rInt),
+				Config: testAccCheckPureProtectiongroupConfigWithRetention(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 				),
@@ -136,13 +152,13 @@ func TestAccResourcePureProtectiongroup_update_withHosts(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Config: testAccCheckPureProtectiongroupConfigBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 				),
 			},
 			{
-				Config: testAccCheckPureProtectiongroupConfig_withHosts(rInt),
+				Config: testAccCheckPureProtectiongroupConfigWithHosts(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 					testAccCheckPureHostExists("purestorage_host.tfpgrouptesthost", true),
@@ -162,13 +178,13 @@ func TestAccResourcePureProtectiongroup_update_withHostgroups(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Config: testAccCheckPureProtectiongroupConfigBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 				),
 			},
 			{
-				Config: testAccCheckPureProtectiongroupConfig_withHostgroups(rInt),
+				Config: testAccCheckPureProtectiongroupConfigWithHostgroups(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 					testAccCheckPureHostgroupExists("purestorage_hostgroup.tfpgrouptesthgroup", true),
@@ -188,13 +204,13 @@ func TestAccResourcePureProtectiongroup_update_withVolumes(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Config: testAccCheckPureProtectiongroupConfigBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 				),
 			},
 			{
-				Config: testAccCheckPureProtectiongroupConfig_withVolumes(rInt),
+				Config: testAccCheckPureProtectiongroupConfigWithVolumes(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 					testAccCheckPureVolumeExists("purestorage_volume.tfpgrouptest-volume", true),
@@ -214,13 +230,13 @@ func TestAccResourcePureProtectiongroup_update_withSchedule(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Config: testAccCheckPureProtectiongroupConfigBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 				),
 			},
 			{
-				Config: testAccCheckPureProtectiongroupConfig_withSchedule(rInt),
+				Config: testAccCheckPureProtectiongroupConfigWithSchedule(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 				),
@@ -238,13 +254,13 @@ func TestAccResourcePureProtectiongroup_update_withRetention(t *testing.T) {
 		CheckDestroy: testAccCheckPureProtectiongroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureProtectiongroupConfig_basic(rInt),
+				Config: testAccCheckPureProtectiongroupConfigBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 				),
 			},
 			{
-				Config: testAccCheckPureProtectiongroupConfig_withRetention(rInt),
+				Config: testAccCheckPureProtectiongroupConfigWithRetention(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureProtectiongroupExists(testAccCheckPureProtectiongroupResourceName, true),
 				),
@@ -264,9 +280,8 @@ func testAccCheckPureProtectiongroupDestroy(s *terraform.State) error {
 		_, err := client.Protectiongroups.GetProtectiongroup(rs.Primary.ID, nil)
 		if err != nil {
 			return nil
-		} else {
-			return fmt.Errorf("protectiongroup '%s' stil exists", rs.Primary.ID)
 		}
+		return fmt.Errorf("protectiongroup '%s' stil exists", rs.Primary.ID)
 	}
 
 	return nil
@@ -317,10 +332,10 @@ func testAccCheckPureProtectiongroupHosts(n string, host string, exists bool) re
 			if exists {
 				return nil
 			}
-			return fmt.Errorf("Host %s still connected to Protection Group %s.", host, name)
+			return fmt.Errorf("host %s still connected to Protection Group %s", host, name)
 		}
 		if exists {
-			return fmt.Errorf("Host %s not connected to Protection Group %s.", host, name)
+			return fmt.Errorf("host %s not connected to Protection Group %s", host, name)
 		}
 		return nil
 	}
@@ -347,10 +362,10 @@ func testAccCheckPureProtectiongroupHostgroups(n string, hostgroup string, exist
 			if exists {
 				return nil
 			}
-			return fmt.Errorf("Hostgroup %s still connected to Protection Group %s.", hostgroup, name)
+			return fmt.Errorf("hostgroup %s still connected to Protection Group %s", hostgroup, name)
 		}
 		if exists {
-			return fmt.Errorf("Hostgroup %s not connected to Protection Group %s.", hostgroup, name)
+			return fmt.Errorf("hostgroup %s not connected to Protection Group %s", hostgroup, name)
 		}
 		return nil
 	}
@@ -377,23 +392,23 @@ func testAccCheckPureProtectiongroupVolumes(n string, volume string, exists bool
 			if exists {
 				return nil
 			}
-			return fmt.Errorf("Volume %s still connected to Protection Group.", volume)
+			return fmt.Errorf("volume %s still connected to Protection Group", volume)
 		}
 		if exists {
-			return fmt.Errorf("Volume %s not connected to Protection Group.", volume)
+			return fmt.Errorf("volume %s not connected to Protection Group", volume)
 		}
 		return nil
 	}
 }
 
-func testAccCheckPureProtectiongroupConfig_basic(rInt int) string {
+func testAccCheckPureProtectiongroupConfigBasic(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
         name = "tfprotectiongrouptest-%d"
 }`, rInt)
 }
 
-func testAccCheckPureProtectiongroupConfig_withHosts(rInt int) string {
+func testAccCheckPureProtectiongroupConfigWithHosts(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_host" "tfpgrouptesthost" {
         name = "tfpgrouptesthost"
@@ -405,7 +420,7 @@ resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
 }`, rInt)
 }
 
-func testAccCheckPureProtectiongroupConfig_withVolumes(rInt int) string {
+func testAccCheckPureProtectiongroupConfigWithVolumes(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfpgrouptest-volume" {
 	name = "tfpgrouptest-volume-%d"
@@ -418,7 +433,7 @@ resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
 }`, rInt, rInt)
 }
 
-func testAccCheckPureProtectiongroupConfig_withHostgroups(rInt int) string {
+func testAccCheckPureProtectiongroupConfigWithHostgroups(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_hostgroup" "tfpgrouptesthgroup" {
 	name = "tfpgrouptesthgroup"
@@ -430,7 +445,7 @@ resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
 }`, rInt)
 }
 
-func testAccCheckPureProtectiongroupConfig_withSchedule(rInt int) string {
+func testAccCheckPureProtectiongroupConfigWithSchedule(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
         name = "tfprotectiongrouptest-%d"
@@ -443,7 +458,7 @@ resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
 }`, rInt)
 }
 
-func testAccCheckPureProtectiongroupConfig_withRetention(rInt int) string {
+func testAccCheckPureProtectiongroupConfigWithRetention(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_protectiongroup" "tfprotectiongrouptest" {
 	name = "tfprotectiongrouptest-%d"

@@ -1,3 +1,19 @@
+/*
+   Copyright 2018 David Evans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
 package purestorage
 
 import (
@@ -5,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/devans10/go-purestorage/flasharray"
+	"github.com/devans10/pugo/flasharray"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -22,7 +38,7 @@ func TestAccResourcePureHost_create(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostConfig_basic(rInt),
+				Config: testAccCheckPureHostConfigBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
@@ -41,7 +57,7 @@ func TestAccResourcePureHost_createWithWWN(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostConfig_withWWN(rInt),
+				Config: testAccCheckPureHostConfigWithWWN(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
@@ -61,7 +77,7 @@ func TestAccResourcePureHost_createWithVolume(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostConfig_withVolume(rInt),
+				Config: testAccCheckPureHostConfigWithVolume(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
@@ -107,7 +123,7 @@ func TestAccResourcePureHost_createWithPrivateAndSharedVolumes(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostConfig_withPrivateAndSharedVolumes(rInt),
+				Config: testAccCheckPureHostConfigWithPrivateAndSharedVolumes(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
@@ -126,7 +142,7 @@ func TestAccResourcePureHost_createWithPersonality(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostConfig_withPersonality(rInt),
+				Config: testAccCheckPureHostConfigWithPersonality(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
@@ -147,20 +163,20 @@ func TestAccResourcePureHost_update(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostConfig_basic(rInt),
+				Config: testAccCheckPureHostConfigBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
 				),
 			},
 			{
-				Config: testAccCheckPureHostConfig_withWWN(rInt),
+				Config: testAccCheckPureHostConfigWithWWN(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostWWN(testAccCheckPureHostResourceName, "0000999900009999", true),
 				),
 			},
 			{
-				Config: testAccCheckPureHostConfig_rename(rInt),
+				Config: testAccCheckPureHostConfigRename(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttestrename%d", rInt)),
 				),
@@ -178,20 +194,20 @@ func TestAccResourcePureHost_update_AddandRemoveVolume(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostConfig_basic(rInt),
+				Config: testAccCheckPureHostConfigBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
 				),
 			},
 			{
-				Config: testAccCheckPureHostConfig_withVolume(rInt),
+				Config: testAccCheckPureHostConfigWithVolume(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostVolumeConnection(testAccCheckPureHostResourceName, fmt.Sprintf("tfhosttest-volume-%d", rInt), true),
 				),
 			},
 			{
-				Config: testAccCheckPureHostConfig_withoutVolume(rInt),
+				Config: testAccCheckPureHostConfigWithoutVolume(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostVolumeConnection(testAccCheckPureHostResourceName, fmt.Sprintf("tfhosttest-volume-%d", rInt), false),
 				),
@@ -241,14 +257,14 @@ func TestAccResourcePureHost_update_withPersonality(t *testing.T) {
 		CheckDestroy: testAccCheckPureHostDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPureHostConfig_basic(rInt),
+				Config: testAccCheckPureHostConfigBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
 				),
 			},
 			{
-				Config: testAccCheckPureHostConfig_withPersonality(rInt),
+				Config: testAccCheckPureHostConfigWithPersonality(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureHostExists(testAccCheckPureHostResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureHostResourceName, "name", fmt.Sprintf("tfhosttest%d", rInt)),
@@ -271,9 +287,8 @@ func testAccCheckPureHostDestroy(s *terraform.State) error {
 		_, err := client.Hosts.GetHost(rs.Primary.ID, nil)
 		if err != nil {
 			return nil
-		} else {
-			return fmt.Errorf("host '%s' stil exists", rs.Primary.ID)
 		}
+		return fmt.Errorf("host '%s' stil exists", rs.Primary.ID)
 	}
 
 	return nil
@@ -324,10 +339,10 @@ func testAccCheckPureHostWWN(n string, wwn string, exists bool) resource.TestChe
 			if exists {
 				return nil
 			}
-			return fmt.Errorf("wwn %s is still set for host.", wwn)
+			return fmt.Errorf("wwn %s is still set for host", wwn)
 		}
 		if exists {
-			return fmt.Errorf("wwn %s not set for host.", wwn)
+			return fmt.Errorf("wwn %s not set for host", wwn)
 		}
 		return nil
 	}
@@ -355,11 +370,11 @@ func testAccCheckPureHostVolumeConnection(n string, volume string, exists bool) 
 				if exists {
 					return nil
 				}
-				return fmt.Errorf("Volume %s still connected to host.", volume)
+				return fmt.Errorf("volume %s still connected to host", volume)
 			}
 		}
 		if exists {
-			return fmt.Errorf("Volume %s not connected to host.", volume)
+			return fmt.Errorf("volume %s not connected to host", volume)
 		}
 		return nil
 	}
@@ -392,7 +407,7 @@ func testAccCheckPureHostCHAP(n string, param string, value string, exists bool)
 				return fmt.Errorf("%s is still set for host", param)
 			}
 			if exists {
-				return fmt.Errorf("%s not set for host.", param)
+				return fmt.Errorf("%s not set for host", param)
 			}
 			return nil
 		case "host_user":
@@ -403,7 +418,7 @@ func testAccCheckPureHostCHAP(n string, param string, value string, exists bool)
 				return fmt.Errorf("%s is still set for host", param)
 			}
 			if exists {
-				return fmt.Errorf("%s not set for host.", param)
+				return fmt.Errorf("%s not set for host", param)
 			}
 			return nil
 		case "target_password":
@@ -414,7 +429,7 @@ func testAccCheckPureHostCHAP(n string, param string, value string, exists bool)
 				return fmt.Errorf("%s is still set for host", param)
 			}
 			if exists {
-				return fmt.Errorf("%s not set for host.", param)
+				return fmt.Errorf("%s not set for host", param)
 			}
 			return nil
 		case "target_user":
@@ -425,11 +440,11 @@ func testAccCheckPureHostCHAP(n string, param string, value string, exists bool)
 				return fmt.Errorf("%s is still set for host", param)
 			}
 			if exists {
-				return fmt.Errorf("%s not set for host.", param)
+				return fmt.Errorf("%s not set for host", param)
 			}
 			return nil
 		default:
-			return fmt.Errorf("%s is not a valid CHAP parameter.", param)
+			return fmt.Errorf("%s is not a valid CHAP parameter", param)
 		}
 	}
 }
@@ -455,23 +470,23 @@ func testAccCheckPureHostPersonality(n string, personality string, exists bool) 
 			if exists {
 				return nil
 			}
-			return fmt.Errorf("personality %s is still set for host.", personality)
+			return fmt.Errorf("personality %s is still set for host", personality)
 		}
 		if exists {
-			return fmt.Errorf("personality %s not set for host.", personality)
+			return fmt.Errorf("personality %s not set for host", personality)
 		}
 		return nil
 	}
 }
 
-func testAccCheckPureHostConfig_basic(rInt int) string {
+func testAccCheckPureHostConfigBasic(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_host" "tfhosttest" {
         name = "tfhosttest%d"
 }`, rInt)
 }
 
-func testAccCheckPureHostConfig_rename(rInt int) string {
+func testAccCheckPureHostConfigRename(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_host" "tfhosttest" {
         name = "tfhosttestrename%d"
@@ -479,7 +494,7 @@ resource "purestorage_host" "tfhosttest" {
 }`, rInt)
 }
 
-func testAccCheckPureHostConfig_withWWN(rInt int) string {
+func testAccCheckPureHostConfigWithWWN(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_host" "tfhosttest" {
         name = "tfhosttest%d"
@@ -487,7 +502,7 @@ resource "purestorage_host" "tfhosttest" {
 }`, rInt)
 }
 
-func testAccCheckPureHostConfig_withVolume(rInt int) string {
+func testAccCheckPureHostConfigWithVolume(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfhosttest-volume" {
 	name = "tfhosttest-volume-%d"
@@ -503,7 +518,7 @@ resource "purestorage_host" "tfhosttest" {
 }`, rInt, rInt)
 }
 
-func testAccCheckPureHostConfig_withoutVolume(rInt int) string {
+func testAccCheckPureHostConfigWithoutVolume(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfhosttest-volume" {
         name = "tfhosttest-volume-%d"
@@ -515,7 +530,7 @@ resource "purestorage_host" "tfhosttest" {
 }`, rInt, rInt)
 }
 
-func testAccCheckPureHostConfig_withCHAP(rInt int) string {
+func testAccCheckPureHostConfigWithCHAP(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_host" "tfhosttest" {
 	name = "tfhosttest%d"
@@ -524,7 +539,7 @@ resource "purestorage_host" "tfhosttest" {
 }`, rInt)
 }
 
-func testAccCheckPureHostConfig_withPersonality(rInt int) string {
+func testAccCheckPureHostConfigWithPersonality(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_host" "tfhosttest" {
         name = "tfhosttest%d"
@@ -532,7 +547,7 @@ resource "purestorage_host" "tfhosttest" {
 }`, rInt)
 }
 
-func testAccCheckPureHostConfig_withPrivateAndSharedVolumes(rInt int) string {
+func testAccCheckPureHostConfigWithPrivateAndSharedVolumes(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfhosttest-private-volume" {
 	name = "tfhosttest-private-volume-%d"
