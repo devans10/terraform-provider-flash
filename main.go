@@ -17,7 +17,7 @@
 package main
 
 import (
-	"github.com/devans10/terraform-provider-purestorage/purestorage"
+	"github.com/devans10/terraform-provider-flash/purestorage"
 	"github.com/hashicorp/terraform/plugin"
 )
 
