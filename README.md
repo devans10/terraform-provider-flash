@@ -6,6 +6,8 @@ This is the repository for the Terraform Flash Provider.  The plugin provides re
 
 For general information about Terraform, visit the [official website](https://terraform.io) and the [GitHub project page.](https://github.com/hashicorp/terraform)
 
+The documentation for the provider can be found on the [Provider's website](https://www.terraform-purestorage.com)
+
 This provider plugin is maintained by Dave Evans.
 
 Please submit issues [here](https://github.com/devans10/terraform-provider-flash/issues).
