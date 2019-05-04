@@ -50,8 +50,8 @@ func dataSourcePureFlashArrayRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.SetId(flasharray.Id)
-	d.Set("name", flasharray.Array_name)
+	d.SetId(flasharray.ID)
+	d.Set("name", flasharray.ArrayName)
 	d.Set("version", flasharray.Version)
 	d.Set("revision", flasharray.Revision)
 	return nil
