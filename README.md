@@ -1,6 +1,5 @@
 # Terraform Provider Flash
 
-==================
 [![Build Status](https://travis-ci.com/devans10/terraform-provider-flash.svg?branch=master)](https://travis-ci.com/devans10/terraform-provider-flash)
 
 This is the repository for the Terraform Flash Provider.  The plugin provides resources for the Pure Storage FlashArray to be managed within Terraform.
