@@ -1,7 +1,7 @@
 ---
 title: "purestorage_flasharray"
 date: 2019-03-22T21:09:33-04:00
-lastmod: 2019-03-22T21:09:33-04:00
+lastmod: 2019-05-04T21:09:33-04:00
 draft: false
 description: ""
 weight: 5
@@ -13,7 +13,7 @@ Get information on a FlashArray.  This data source provides the name, version, r
 
 Get the FlashArray
 
-```
+```sh
 data "purestorage_flasharray" "example" {
   name = "example"
 }

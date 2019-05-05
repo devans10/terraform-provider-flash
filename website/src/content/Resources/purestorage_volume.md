@@ -1,7 +1,7 @@
 ---
 title: "purestorage_volume"
 date: 2019-03-22T21:19:18-04:00
-lastmod: 2019-03-22T21:19:18-04:00
+lastmod: 2019-05-04T21:19:18-04:00
 draft: false
 description: ""
 weight: 5
@@ -11,7 +11,7 @@ Provides a Pure Storage volume resource
 
 ## Example Usage
 
-```
+```sh
 resource "purestorage_volume" "vol" {
   name = "volume_name"
   size = 1073741824
@@ -43,6 +43,6 @@ The following attributes are exported:
 
 volume can be imported using the volume name
 
-```
+```sh
 terraform import purestorage_volume vol
 ```

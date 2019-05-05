@@ -1,8 +1,8 @@
-baseURL = "https://www.terraform-purestorage.com"
+baseURL = "https://www.terraform-provider-flash.com"
 
 languageCode = "en-us"
 DefaultContentLanguage = "en"
-title = "Pure Storage Terraform Provider"
+title = "Terraform Provider Flash"
 theme = "hugo-theme-techdoc"
 
 hasCJKLanguage = true
@@ -19,12 +19,12 @@ enableMissingTranslationPlaceholders = false
 
     # Souce Code repository section
     description = "Terraform Provider for Pure Storage Flash Array"
-    github_repository = "https://github.com/devans10/terraform-provider-purestorage"
-    version = "0.4.0"
+    github_repository = "https://github.com/devans10/terraform-provider-flash"
+    version = "1.0.0"
 
     # Documentation repository section
     # documentation repository (set edit link to documentation repository)
-    github_doc_repository = "https://github.com/devans10/terraform-provider-purestorage/website/src/content"
+    github_doc_repository = "https://github.com/devans10/terraform-provider-flash/website/src/content"
 
     # Analytic section
     google_analytics_id = "" # Your Google Analytics tracking id

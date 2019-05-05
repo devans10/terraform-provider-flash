@@ -7,9 +7,9 @@ locals {
     }
   }
 }
-resource "kubernetes_secret" "tf-regsecret" {
+resource "kubernetes_secret" "tfpf-regsecret" {
   metadata {
-    name = "tf-regsecret"
+    name = "tfpf-regsecret"
   }
 
   data {
@@ -19,11 +19,11 @@ resource "kubernetes_secret" "tf-regsecret" {
   type = "kubernetes.io/dockercfg"
 }
 
-resource "kubernetes_deployment" "terraform-purestorage" {
+resource "kubernetes_deployment" "terraform-provider-flash-website" {
   metadata {
-    name = "terraform-purestorage"
+    name = "terraform-provider-flash-website"
     labels {
-      app = "terraform-purestorage"
+      app = "terraform-provider-flash-website"
     }
   }
 
@@ -32,20 +32,20 @@ resource "kubernetes_deployment" "terraform-purestorage" {
 
     selector {
       match_labels {
-        app = "terraform-purestorage"
+        app = "terraform-provider-flash-website"
       }
     }
 
     template {
       metadata {
         labels {
-          app = "terraform-purestorage"
+          app = "terraform-provider-flash-website"
         }
       }
 
       spec {
         container {
-           name = "terraform-purestorage"
+           name = "terraform-provider-flash-website"
            image = "${var.image}"
            image_pull_policy = "Always"
            port {
@@ -53,7 +53,7 @@ resource "kubernetes_deployment" "terraform-purestorage" {
            }
          }
          image_pull_secrets {
-           name = "${kubernetes_secret.tf-regsecret.metadata.0.name}"
+           name = "${kubernetes_secret.tfpf-regsecret.metadata.0.name}"
          }
        }
      }
@@ -61,13 +61,13 @@ resource "kubernetes_deployment" "terraform-purestorage" {
 }
 
 
-resource "kubernetes_service" "terraform-purestorage" {
+resource "kubernetes_service" "terraform-provider-flash-website" {
   metadata {
-    name = "terraform-purestorage"
+    name = "terraform-provider-flash-website"
   }
   spec {
     selector {
-      app = "${kubernetes_deployment.terraform-purestorage.metadata.0.labels.app}"
+      app = "${kubernetes_deployment.terraform-provider-flash-website.metadata.0.labels.app}"
     }
     port {
       port = 80

@@ -1,7 +1,7 @@
 ---
-title: "Pure Storage Provider"
+title: "Flash Provider"
 date: 2019-03-22T20:49:09-04:00
-lastmod: 2019-04-06T09:33:09-04:00
+lastmod: 2019-05-04T09:33:09-04:00
 draft: false
 description: ""
 weight: 2
@@ -11,7 +11,7 @@ The Pure Storage provider is used to interact with the resources supported by th
 
 ## Example Usage
 
-```
+```sh
 # Set the variable values in *.tfvars file
 # of using -var="purestorage_target=..." CLI option
 variable "purestorage_target" {}

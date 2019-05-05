@@ -1,7 +1,7 @@
 ---
 title: "purestorage_protectiongroup"
 date: 2019-03-22T21:20:11-04:00
-lastmod: 2019-03-22T21:20:11-04:00
+lastmod: 2019-05-04T21:20:11-04:00
 draft: false
 description: ""
 weight: 3
@@ -11,7 +11,7 @@ Provides a Pure Storage Protection Group resource.
 
 ## Example Usage
 
-```
+```sh
 resource "purestorage_protectiongroup" "example" {
   name = "example"
 }
@@ -68,6 +68,6 @@ The following attributes are exported:
 
 Protection groups can be imported using the Protection group name.
 
-```
+```sh
 terraform import purestorage_protectiongroup example
 ```

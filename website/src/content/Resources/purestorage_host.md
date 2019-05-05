@@ -1,7 +1,7 @@
 ---
 title: "purestorage_host"
 date: 2019-03-22T21:19:24-04:00
-lastmod: 2019-03-22T21:19:24-04:00
+lastmod: 2019-05-04T21:19:24-04:00
 draft: false
 description: ""
 weight: 1
@@ -11,7 +11,7 @@ Provides a Pure Storage host resource.
 
 ## Example Usage
 
-```
+```sh
 resource "purestorage_host" "example" {
   name = "example"
 }
@@ -59,6 +59,6 @@ The following attributes are exported:
 
 hosts can be imported using the host name
 
-```
+```sh
 terraform import purestorage_host example
 ```
