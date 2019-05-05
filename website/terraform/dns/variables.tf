@@ -1,0 +1,3 @@
+variable "ipaddress" {}
+
+variable "sitename" {}

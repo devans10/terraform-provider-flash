@@ -1,3 +1,19 @@
+/*
+   Copyright 2018 David Evans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
 package purestorage
 
 import (
@@ -18,15 +34,15 @@ func testAccClientPreCheck(t *testing.T) {
 func testAccClientGenerateConfig(t *testing.T) *Config {
 
 	return &Config{
-		Username:       os.Getenv("PURE_USERNAME"),
-		Password:       os.Getenv("PURE_PASSWORD"),
-		Target:         os.Getenv("PURE_TARGET"),
-		ApiToken:       os.Getenv("PURE_APITOKEN"),
-		Rest_version:   "",
-		Verify_https:   false,
-		Ssl_cert:       false,
-		User_agent:     "",
-		Request_kwargs: nil,
+		Username:      os.Getenv("PURE_USERNAME"),
+		Password:      os.Getenv("PURE_PASSWORD"),
+		Target:        os.Getenv("PURE_TARGET"),
+		APIToken:      os.Getenv("PURE_APITOKEN"),
+		RestVersion:   "",
+		VerifyHTTPS:   false,
+		SslCert:       false,
+		UserAgent:     "",
+		RequestKwargs: nil,
 	}
 }
 
@@ -43,15 +59,15 @@ func TestAccClient(t *testing.T) {
 
 func TestNewConfigWithApiToken(t *testing.T) {
 	expected := &Config{
-		Username:       "",
-		Password:       "",
-		Target:         "purestorage.flasharray",
-		ApiToken:       "foobar",
-		Rest_version:   "1.15",
-		Verify_https:   false,
-		Ssl_cert:       false,
-		User_agent:     "useragent",
-		Request_kwargs: map[string]string{},
+		Username:      "",
+		Password:      "",
+		Target:        "purestorage.flasharray",
+		APIToken:      "foobar",
+		RestVersion:   "1.15",
+		VerifyHTTPS:   false,
+		SslCert:       false,
+		UserAgent:     "useragent",
+		RequestKwargs: map[string]string{},
 	}
 
 	r := &schema.Resource{Schema: Provider().(*schema.Provider).Schema}
@@ -59,11 +75,11 @@ func TestNewConfigWithApiToken(t *testing.T) {
 	d.Set("username", expected.Username)
 	d.Set("password", expected.Password)
 	d.Set("target", expected.Target)
-	d.Set("api_token", expected.ApiToken)
-	d.Set("rest_version", expected.Rest_version)
-	d.Set("verify_https", expected.Verify_https)
-	d.Set("ssl_cert", expected.Ssl_cert)
-	d.Set("user_agent", expected.User_agent)
+	d.Set("api_token", expected.APIToken)
+	d.Set("rest_version", expected.RestVersion)
+	d.Set("verify_https", expected.VerifyHTTPS)
+	d.Set("ssl_cert", expected.SslCert)
+	d.Set("user_agent", expected.UserAgent)
 
 	actual, err := NewConfig(d)
 	if err != nil {
@@ -76,15 +92,15 @@ func TestNewConfigWithApiToken(t *testing.T) {
 
 func TestNewConfigWithUsernameAndPassword(t *testing.T) {
 	expected := &Config{
-		Username:       "foo",
-		Password:       "bar",
-		Target:         "purestorage.flasharray",
-		ApiToken:       "",
-		Rest_version:   "1.15",
-		Verify_https:   false,
-		Ssl_cert:       false,
-		User_agent:     "useragent",
-		Request_kwargs: map[string]string{},
+		Username:      "foo",
+		Password:      "bar",
+		Target:        "purestorage.flasharray",
+		APIToken:      "",
+		RestVersion:   "1.15",
+		VerifyHTTPS:   false,
+		SslCert:       false,
+		UserAgent:     "useragent",
+		RequestKwargs: map[string]string{},
 	}
 
 	r := &schema.Resource{Schema: Provider().(*schema.Provider).Schema}
@@ -92,11 +108,11 @@ func TestNewConfigWithUsernameAndPassword(t *testing.T) {
 	d.Set("username", expected.Username)
 	d.Set("password", expected.Password)
 	d.Set("target", expected.Target)
-	d.Set("api_token", expected.ApiToken)
-	d.Set("rest_version", expected.Rest_version)
-	d.Set("verify_https", expected.Verify_https)
-	d.Set("ssl_cert", expected.Ssl_cert)
-	d.Set("user_agent", expected.User_agent)
+	d.Set("api_token", expected.APIToken)
+	d.Set("rest_version", expected.RestVersion)
+	d.Set("verify_https", expected.VerifyHTTPS)
+	d.Set("ssl_cert", expected.SslCert)
+	d.Set("user_agent", expected.UserAgent)
 
 	actual, err := NewConfig(d)
 	if err != nil {
@@ -109,15 +125,15 @@ func TestNewConfigWithUsernameAndPassword(t *testing.T) {
 
 func TestNewConfigWithAllAuth(t *testing.T) {
 	expected := &Config{
-		Username:       "foo",
-		Password:       "bar",
-		Target:         "purestorage.flasharray",
-		ApiToken:       "foobar",
-		Rest_version:   "1.15",
-		Verify_https:   false,
-		Ssl_cert:       false,
-		User_agent:     "useragent",
-		Request_kwargs: map[string]string{},
+		Username:      "foo",
+		Password:      "bar",
+		Target:        "purestorage.flasharray",
+		APIToken:      "foobar",
+		RestVersion:   "1.15",
+		VerifyHTTPS:   false,
+		SslCert:       false,
+		UserAgent:     "useragent",
+		RequestKwargs: map[string]string{},
 	}
 
 	r := &schema.Resource{Schema: Provider().(*schema.Provider).Schema}
@@ -125,11 +141,11 @@ func TestNewConfigWithAllAuth(t *testing.T) {
 	d.Set("username", expected.Username)
 	d.Set("password", expected.Password)
 	d.Set("target", expected.Target)
-	d.Set("api_token", expected.ApiToken)
-	d.Set("rest_version", expected.Rest_version)
-	d.Set("verify_https", expected.Verify_https)
-	d.Set("ssl_cert", expected.Ssl_cert)
-	d.Set("user_agent", expected.User_agent)
+	d.Set("api_token", expected.APIToken)
+	d.Set("rest_version", expected.RestVersion)
+	d.Set("verify_https", expected.VerifyHTTPS)
+	d.Set("ssl_cert", expected.SslCert)
+	d.Set("user_agent", expected.UserAgent)
 
 	_, err := NewConfig(d)
 	if err == nil {

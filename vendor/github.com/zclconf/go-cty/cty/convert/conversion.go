@@ -21,11 +21,6 @@ func getConversion(in cty.Type, out cty.Type, unsafe bool) conversion {
 			return cty.UnknownVal(out), nil
 		}
 		if in.IsNull() {
-			// If the output is a DynamicPseudoType, the type doesn't matter,
-			// so retain the type for proper null comparison.
-			if out == cty.DynamicPseudoType {
-				return in, nil
-			}
 			// We'll pass through nulls, albeit type converted, and let
 			// the caller deal with whatever handling they want to do in
 			// case null values are considered valid in some applications.
@@ -61,9 +56,6 @@ func getConversionKnown(in cty.Type, out cty.Type, unsafe bool) conversion {
 			return primitiveConversionsUnsafe[in][out]
 		}
 		return nil
-
-	case out.IsObjectType() && in.IsObjectType():
-		return conversionObjectToObject(in, out, unsafe)
 
 	case out.IsListType() && (in.IsListType() || in.IsSetType()):
 		inEty := in.ElementType()
@@ -101,22 +93,9 @@ func getConversionKnown(in cty.Type, out cty.Type, unsafe bool) conversion {
 		}
 		return conversionCollectionToSet(outEty, convEty)
 
-	case out.IsMapType() && in.IsMapType():
-		inEty := in.ElementType()
-		outEty := out.ElementType()
-		convEty := getConversion(inEty, outEty, unsafe)
-		if convEty == nil {
-			return nil
-		}
-		return conversionCollectionToMap(outEty, convEty)
-
 	case out.IsListType() && in.IsTupleType():
 		outEty := out.ElementType()
 		return conversionTupleToList(in, outEty, unsafe)
-
-	case out.IsSetType() && in.IsTupleType():
-		outEty := out.ElementType()
-		return conversionTupleToSet(in, outEty, unsafe)
 
 	case out.IsMapType() && in.IsObjectType():
 		outEty := out.ElementType()

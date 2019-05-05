@@ -1,3 +1,10 @@
+# CHANGELOG
+
+## 1.0.0
+
+Changed Project Name to terraform-provider-flash
+Changed License to Apache 2.0
+
 ## 0.4.0
 
 BREAKING CHANGE:

@@ -1,3 +1,19 @@
+/*
+   Copyright 2018 David Evans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
 package purestorage
 
 import (
@@ -5,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/devans10/go-purestorage/flasharray"
+	"github.com/devans10/pugo/flasharray"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -54,7 +70,7 @@ func TestAccResourcePureVolume_clone(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckPureVolumeConfig_clone(rInt),
+				Config: testAccCheckPureVolumeConfigClone(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureVolumeExists(testAccCheckPureVolumeCloneResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureVolumeCloneResourceName, "source", fmt.Sprintf("tfvolumetest-%d", rInt)),
@@ -82,7 +98,7 @@ func TestAccResourcePureVolume_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckPureVolumeConfig_resize(rInt),
+				Config: testAccCheckPureVolumeConfigResize(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureVolumeExists(testAccCheckPureVolumeResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "name", fmt.Sprintf("tfvolumetest-%d", rInt)),
@@ -91,7 +107,7 @@ func TestAccResourcePureVolume_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckPureVolumeConfig_rename(rInt),
+				Config: testAccCheckPureVolumeConfigRename(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPureVolumeExists(testAccCheckPureVolumeResourceName, true),
 					resource.TestCheckResourceAttr(testAccCheckPureVolumeResourceName, "name", fmt.Sprintf("tfvolumetest-rename-%d", rInt)),
@@ -114,9 +130,8 @@ func testAccCheckPureVolumeDestroy(s *terraform.State) error {
 		_, err := client.Volumes.GetVolume(rs.Primary.ID, nil)
 		if err != nil {
 			return nil
-		} else {
-			return fmt.Errorf("volume '%s' stil exists", rs.Primary.ID)
 		}
+		return fmt.Errorf("volume '%s' stil exists", rs.Primary.ID)
 	}
 
 	return nil
@@ -153,7 +168,7 @@ resource "purestorage_volume" "tfvolumetest" {
 }`, rInt)
 }
 
-func testAccCheckPureVolumeConfig_clone(rInt int) string {
+func testAccCheckPureVolumeConfigClone(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfvolumetest" {
         name = "tfvolumetest-%d"
@@ -166,7 +181,7 @@ resource "purestorage_volume" "tfclonevolumetest" {
 }`, rInt, rInt)
 }
 
-func testAccCheckPureVolumeConfig_resize(rInt int) string {
+func testAccCheckPureVolumeConfigResize(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfvolumetest" {
 	name = "tfvolumetest-%d"
@@ -174,7 +189,7 @@ resource "purestorage_volume" "tfvolumetest" {
 }`, rInt)
 }
 
-func testAccCheckPureVolumeConfig_rename(rInt int) string {
+func testAccCheckPureVolumeConfigRename(rInt int) string {
 	return fmt.Sprintf(`
 resource "purestorage_volume" "tfvolumetest" {
         name = "tfvolumetest-rename-%d"
