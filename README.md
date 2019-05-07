@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/devans10/terraform-provider-flash.svg?branch=master)](https://travis-ci.com/devans10/terraform-provider-flash)
 
-This is the repository for the Terraform Flash Provider.  The plugin provides resources for the Pure Storage FlashArray to be managed within Terraform.
+This is the repository for the Terraform Provider Flash.  The plugin provides resources for the Pure Storage FlashArray to be managed within Terraform.
 
 For general information about Terraform, visit the [official website](https://terraform.io) and the [GitHub project page.](https://github.com/hashicorp/terraform)
 
@@ -166,3 +166,7 @@ Volumes and Protection Groups created during the acceptance tests are not eradic
 ```sh
 make testacc
 ```
+
+## Disclaimer
+
+terraform-provider-flash and its developer(s) are not affiliated with or sponsored by Pure Storage.  The statements and opinions on this site are those of the developer(s) and do not necessarily represent those of Pure Storage. Pure Storage and the Pure Storage trademarks listed at [https://www.purestorage.com/pure-folio/showcase.html?type=pdf&path=/content/dam/pdf/en/legal/external-trademark-list.pdf](https://www.purestorage.com/pure-folio/showcase.html?type=pdf&path=/content/dam/pdf/en/legal/external-trademark-list.pdf) are trademarks of Pure Storage, Inc.
