@@ -20,7 +20,7 @@ enableMissingTranslationPlaceholders = false
     # Souce Code repository section
     description = "Terraform Provider for Pure Storage Flash Array"
     github_repository = "https://github.com/devans10/terraform-provider-flash"
-    version = "1.0.0"
+    version = "1.1.0"
 
     # Documentation repository section
     # documentation repository (set edit link to documentation repository)
