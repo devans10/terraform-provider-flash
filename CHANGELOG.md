@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.0
+
+Updated to Terraform 0.12.7 (fixes #11)
+
 ## 1.0.0
 
 Changed Project Name to terraform-provider-flash
