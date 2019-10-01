@@ -25,7 +25,7 @@ script:
 - if [ "${LATEST}" = "true" ]; then sha1sum darwin/terraform-provider-flash
   > terraform-provider-flash.darwin.sha1; tar -czf terraform-provider-flash.darwin.tar.gz  darwin/terraform-provider-flash;
   fi
-- if [ "${LATEST}" = "true" ]; then sha1sum linux/terraform-provider-purestorage >
+- if [ "${LATEST}" = "true" ]; then sha1sum linux/terraform-provider-flash >
   terraform-provider-flash.linux.sha1; tar -czf terraform-provider-flash.linux.tar.gz  linux/terraform-provider-flash;
   fi
 deploy:
