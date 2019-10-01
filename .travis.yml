@@ -17,31 +17,31 @@ install:
 script:
 - make test
 - make vet
-- if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="{{.OS}}/terraform-provider-purestorage"
+- if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="{{.OS}}/terraform-provider-flash"
   -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
-- if [ "${LATEST}" = "true" ]; then sha1sum windows/terraform-provider-purestorage.exe
-  > terraform-provider-purestorage.windows.sha1; tar -czf terraform-provider-purestorage.windows.tar.gz  windows/terraform-provider-purestorage.exe;
+- if [ "${LATEST}" = "true" ]; then sha1sum windows/terraform-provider-flash.exe
+  > terraform-provider-flash.windows.sha1; tar -czf terraform-provider-flash.windows.tar.gz  windows/terraform-provider-flash.exe;
   fi
-- if [ "${LATEST}" = "true" ]; then sha1sum darwin/terraform-provider-purestorage
-  > terraform-provider-purestorage.darwin.sha1; tar -czf terraform-provider-purestorage.darwin.tar.gz  darwin/terraform-provider-purestorage;
+- if [ "${LATEST}" = "true" ]; then sha1sum darwin/terraform-provider-flash
+  > terraform-provider-flash.darwin.sha1; tar -czf terraform-provider-flash.darwin.tar.gz  darwin/terraform-provider-flash;
   fi
 - if [ "${LATEST}" = "true" ]; then sha1sum linux/terraform-provider-purestorage >
-  terraform-provider-purestorage.linux.sha1; tar -czf terraform-provider-purestorage.linux.tar.gz  linux/terraform-provider-purestorage;
+  terraform-provider-flash.linux.sha1; tar -czf terraform-provider-flash.linux.tar.gz  linux/terraform-provider-flash;
   fi
 deploy:
   provider: releases
   api_key:
     secure: ZW5WPd6KuYqB+nnUl2O3s/jeEubnr+T3oQ6QQuZXgy4GYjIGjnzBeX0FqF42x7x6sj3/9fxP65AwVJgmRjlryqClfTDZjh6GwV6QKnIAhgXdGNOaJZuUJDBmHfcRrqUucvqoCtJiumnITejwpM/qtwd8sO1/RgGe+5cLEXSXpF0wh4ysxCW9hLIA03VvxLXKk+0mjRGyqerXd9XvISxnASbQkXLXCSldoXoN5rWlHLREGMRaVAL2eOP6DyUgGXw/OJIB4P8ic4CRO1EOu4bi+SIgaT3fny5XJhq8ova+jyyD3mFFRjn/qrJ7iarlalfMZ3oetL2LpZ9832fxU1NhXdK0sDvpUFFCwtD7wwAKv8N4OD5wLkbVtR5pT/2g34j6p7ZU/5kcYS8tnUM8lxSWZTAW3X24xX6Yu4P3GEAw7U3Z9ORQ4HaoWR37gysONBB6gDtJLjfk9CZdMebFfvGgQVVJfBRsHlIPf0BoOlUT2nOqOlMz+rHxdevtblsW0Uav2xJS4Bk4N0L24RF0ywbuoFMuSZ/zC/ZKbwVY+4Sk/PkVAHEA02rPLtiBWkI/5Q+Ao1B9DN/IoArqLsaVDjRQfx9BeJGSF41Ssw1OAEP9MLcmQKaAIf428DDt5JLTaiTJ0cqOhIyiMwUXoFw2PIyvpNlManoLzZwQjkA1U/XKY9Q=
   file:
-  - terraform-provider-purestorage.linux.tar.gz
-  - terraform-provider-purestorage.linux.sha1
-  - terraform-provider-purestorage.darwin.tar.gz
-  - terraform-provider-purestorage.darwin.sha1
-  - terraform-provider-purestorage.windows.tar.gz
-  - terraform-provider-purestorage.windows.sha1
+  - terraform-provider-flash.linux.tar.gz
+  - terraform-provider-flash.linux.sha1
+  - terraform-provider-flash.darwin.tar.gz
+  - terraform-provider-flash.darwin.sha1
+  - terraform-provider-flash.windows.tar.gz
+  - terraform-provider-flash.windows.sha1
   skip_cleanup: true
   on:
-    repo: devans10/terraform-provider-purestorage
+    repo: devans10/terraform-provider-flash
     tags: true
 env:
   global:
