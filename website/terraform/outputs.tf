@@ -1,3 +1,3 @@
-output "Site URL" {
+output "Site_URL" {
   value = "${module.dns.fqdn}"
 }

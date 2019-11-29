@@ -3,5 +3,5 @@ data "digitalocean_kubernetes_cluster" "production" {
 }
 
 data "digitalocean_loadbalancer" "nginx-ingress" {
-  name = "nginx-ingress"
+  name = "ab125616b9d3311e9bbae1a4e7fc0bf1"
 }

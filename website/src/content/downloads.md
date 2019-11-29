@@ -6,6 +6,11 @@ draft: false
 description: ""
 weight: 5
 ---
+## v1.1.0
++ [terraform-provider-flash.linux.tar.gz](https://github.com/devans10/terraform-provider-flash/releases/download/v1.1.0/terraform-provider-flash.linux.tar.gz)
++ [terraform-provider-flash.linux.sha1](https://github.com/devans10/terraform-provider-flash/releases/download/v1.1.0/terraform-provider-flash.linux.sha1)
++ [Source code(zip)](https://github.com/devans10/terraform-provider-flash/archive/v1.1.0.zip)
++ [Source code(tar.gz)](https://github.com/devans10/terraform-provider-flash/archive/v1.1.0.tar.gz)
 
 ## v1.0.0
 

@@ -1,13 +1,13 @@
 ---
-title: "Flash Provider"
+title: "Provider"
 date: 2019-03-22T20:49:09-04:00
-lastmod: 2019-05-04T09:33:09-04:00
+lastmod: 2019-05-07T09:33:09-04:00
 draft: false
 description: ""
 weight: 2
 ---
 
-The Pure Storage provider is used to interact with the resources supported by the Pure Storage FlashArray.  The provider needs to be configured with the proper credentials before it can be used.
+The provider is used to interact with the resources supported by the Pure Storage FlashArray.  The provider needs to be configured with the proper credentials before it can be used.
 
 ## Example Usage
 

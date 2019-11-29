@@ -1,7 +1,7 @@
 ---
-title: "Flash Provider"
+title: "Terraform Provider Flash"
 date: 2019-03-22T20:49:09-04:00
-lastmod: 2019-05-04T09:34:09-04:00
+lastmod: 2019-05-07T09:34:09-04:00
 draft: false
 description: ""
 weight: 5
@@ -9,7 +9,7 @@ weight: 5
 
 ## Flash Provider
 
-The Flash provider is used to interact with the resources supported by the Pure Storage FlashArray.  The provider needs to be configured with the proper credentials before it can be used.
+The Terraform Provider Flash is used to interact with the resources supported by the Pure Storage FlashArray.  The provider needs to be configured with the proper credentials before it can be used.
 
 This is an open source community project and is not affiliated with the Pure Storage or HashiCorp companies.
 
