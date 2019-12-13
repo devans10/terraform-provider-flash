@@ -1,0 +1,7 @@
+{
+    "id": "terraform-provider-flash",
+    "filter": "devops",
+    "image": "http://code.purestorage.com/images/27_Terraform.png",
+    "featured": 0,
+    "priority": 3
+}
