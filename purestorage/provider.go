@@ -70,7 +70,7 @@ func Provider() terraform.ResourceProvider {
 			"user_agent": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "",
+				Default:  "Terraform",
 			},
 
 			"request_kwargs": &schema.Schema{
