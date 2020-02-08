@@ -5,7 +5,6 @@ matrix:
   include:
   - go: 1.x
     env: LATEST=true
-  - go: 1.12.x
   - go: 1.13.x
   - go: tip
   allow_failures:
@@ -21,10 +20,10 @@ script:
 - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="{{.OS}}/terraform-provider-flash"
   -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
 - if [ "${LATEST}" = "true" ]; then sha1sum windows/terraform-provider-flash.exe
-  > terraform-provider-flash.windows.sha1; tar -czf terraform-provider-flash.windows.tar.gz  windows/terraform-provider-flash.exe;
+  terraform-provider-flash.windows.sha1; tar -czf terraform-provider-flash.windows.tar.gz  windows/terraform-provider-flash.exe;
   fi
 - if [ "${LATEST}" = "true" ]; then sha1sum darwin/terraform-provider-flash
-  > terraform-provider-flash.darwin.sha1; tar -czf terraform-provider-flash.darwin.tar.gz  darwin/terraform-provider-flash;
+  terraform-provider-flash.darwin.sha1; tar -czf terraform-provider-flash.darwin.tar.gz  darwin/terraform-provider-flash;
   fi
 - if [ "${LATEST}" = "true" ]; then sha1sum linux/terraform-provider-flash >
   terraform-provider-flash.linux.sha1; tar -czf terraform-provider-flash.linux.tar.gz  linux/terraform-provider-flash;
