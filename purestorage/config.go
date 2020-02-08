@@ -36,7 +36,6 @@ type Config struct {
 	RestVersion   string
 	VerifyHTTPS   bool
 	SslCert       bool
-	UserAgent     string
 	RequestKwargs map[string]string
 }
 
@@ -74,7 +73,6 @@ func NewConfig(d *schema.ResourceData) (*Config, error) {
 		RestVersion:   d.Get("rest_version").(string),
 		VerifyHTTPS:   d.Get("verify_https").(bool),
 		SslCert:       d.Get("ssl_cert").(bool),
-		UserAgent:     d.Get("user_agent").(string),
 		RequestKwargs: requestKwargs,
 	}
 
@@ -85,7 +83,7 @@ func NewConfig(d *schema.ResourceData) (*Config, error) {
 //
 func (c *Config) Client() (*flasharray.Client, error) {
 
-	client, err := flasharray.NewClient(c.Target, c.Username, c.Password, c.APIToken, c.RestVersion, c.VerifyHTTPS, c.SslCert, c.UserAgent, c.RequestKwargs)
+	client, err := flasharray.NewClient(c.Target, c.Username, c.Password, c.APIToken, c.RestVersion, c.VerifyHTTPS, c.SslCert, "Terraform", c.RequestKwargs)
 	if err != nil {
 		return nil, err
 	}

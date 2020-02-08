@@ -67,12 +67,6 @@ func Provider() terraform.ResourceProvider {
 				Default:  false,
 			},
 
-			"user_agent": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "Terraform",
-			},
-
 			"request_kwargs": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,

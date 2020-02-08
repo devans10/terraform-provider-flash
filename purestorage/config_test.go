@@ -41,7 +41,6 @@ func testAccClientGenerateConfig(t *testing.T) *Config {
 		RestVersion:   "",
 		VerifyHTTPS:   false,
 		SslCert:       false,
-		UserAgent:     "",
 		RequestKwargs: nil,
 	}
 }
@@ -66,7 +65,6 @@ func TestNewConfigWithApiToken(t *testing.T) {
 		RestVersion:   "1.15",
 		VerifyHTTPS:   false,
 		SslCert:       false,
-		UserAgent:     "useragent",
 		RequestKwargs: map[string]string{},
 	}
 
@@ -79,7 +77,6 @@ func TestNewConfigWithApiToken(t *testing.T) {
 	d.Set("rest_version", expected.RestVersion)
 	d.Set("verify_https", expected.VerifyHTTPS)
 	d.Set("ssl_cert", expected.SslCert)
-	d.Set("user_agent", expected.UserAgent)
 
 	actual, err := NewConfig(d)
 	if err != nil {
@@ -99,7 +96,6 @@ func TestNewConfigWithUsernameAndPassword(t *testing.T) {
 		RestVersion:   "1.15",
 		VerifyHTTPS:   false,
 		SslCert:       false,
-		UserAgent:     "useragent",
 		RequestKwargs: map[string]string{},
 	}
 
@@ -112,7 +108,6 @@ func TestNewConfigWithUsernameAndPassword(t *testing.T) {
 	d.Set("rest_version", expected.RestVersion)
 	d.Set("verify_https", expected.VerifyHTTPS)
 	d.Set("ssl_cert", expected.SslCert)
-	d.Set("user_agent", expected.UserAgent)
 
 	actual, err := NewConfig(d)
 	if err != nil {
@@ -132,7 +127,6 @@ func TestNewConfigWithAllAuth(t *testing.T) {
 		RestVersion:   "1.15",
 		VerifyHTTPS:   false,
 		SslCert:       false,
-		UserAgent:     "useragent",
 		RequestKwargs: map[string]string{},
 	}
 
@@ -145,7 +139,6 @@ func TestNewConfigWithAllAuth(t *testing.T) {
 	d.Set("rest_version", expected.RestVersion)
 	d.Set("verify_https", expected.VerifyHTTPS)
 	d.Set("ssl_cert", expected.SslCert)
-	d.Set("user_agent", expected.UserAgent)
 
 	_, err := NewConfig(d)
 	if err == nil {
