@@ -16,8 +16,8 @@ Please submit issues [here](https://github.com/devans10/terraform-provider-flash
 
 ------------
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.11.x (the provider was tested against 0.11.10)
-- [Go](https://golang.org/doc/install) 1.11 (to build the provider plugin)
+- [Terraform](https://www.terraform.io/downloads.html) 0.12.x (the provider was tested against 0.12.16)
+- [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
 
 ## Usage
 
