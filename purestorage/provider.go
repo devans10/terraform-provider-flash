@@ -93,6 +93,7 @@ func Provider() terraform.ResourceProvider {
 			"purestorage_host":            resourcePureHost(),
 			"purestorage_hostgroup":       resourcePureHostgroup(),
 			"purestorage_protectiongroup": resourcePureProtectiongroup(),
+			"purestorage_pod":             resourcePurePod(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
