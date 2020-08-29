@@ -6,6 +6,8 @@ This is the repository for the Terraform Provider Flash.  The plugin provides re
 
 For general information about Terraform, visit the [official website](https://terraform.io) and the [GitHub project page.](https://github.com/hashicorp/terraform)
 
+As of version 1.1.2, the provider is available in the [Terraform Registry](https://registry.terraform.io/providers/devans10/flash/latest?pollNotifications=true), and can be downloaded automatically when running `terraform init`
+
 The documentation for the provider can be found on the [Provider's website](https://www.terraform-provider-flash.com)
 
 This provider plugin is maintained by Dave Evans.
@@ -17,11 +19,26 @@ Please submit issues [here](https://github.com/devans10/terraform-provider-flash
 ------------
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.12.x (the provider was tested against 0.12.16)
-- [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
+- [Go](https://golang.org/doc/install) 1.15 (to build the provider plugin)
 
 ## Usage
 
 ------------
+Add the `required_providers` block to your terraform configuration.
+
+```sh
+terraform {
+  required_providers {
+    purestorage = {
+      source  = "devans10/flash"
+      version = "~> 1.1.2"
+    }
+  }
+}
+```
+
+
+*(Deprecated)*
 Add the following to `$HOME/.terraformrc`
 
 ```sh
