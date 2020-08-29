@@ -5,6 +5,15 @@ The provider is used to interact with the resources supported by the Pure Storag
 ## Example Usage
 
 ```sh
+terraform {
+  required_providers {
+    purestorage = {
+      source  = "devans10/flash"
+      version = "~> 1.1.2"
+    }
+  }
+}
+
 # Set the variable values in *.tfvars file
 # of using -var="purestorage_target=..." CLI option
 variable "purestorage_target" {}
