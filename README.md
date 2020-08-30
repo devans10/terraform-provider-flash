@@ -8,7 +8,7 @@ This is the repository for the Terraform Provider Flash.  The plugin provides re
 
 For general information about Terraform, visit the [official website](https://terraform.io) and the [GitHub project page.](https://github.com/hashicorp/terraform)
 
-As of version 1.1.2, the provider is available in the [Terraform Registry](https://registry.terraform.io/providers/devans10/flash/latest?pollNotifications=true), and can be downloaded automatically when running `terraform init`
+As of version 1.1.2, the provider is available in the [Terraform Registry](https://registry.terraform.io/providers/devans10/flash/latest?pollNotifications=true), and can be downloaded automatically when running `terraform init`.  
 
 The documentation for the provider can be found on the [Provider's website](https://www.terraform-provider-flash.com)
 
@@ -20,7 +20,7 @@ Please submit issues [here](https://github.com/devans10/terraform-provider-flash
 
 ------------
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.12.x (the provider was tested against 0.12.16)
+- [Terraform](https://www.terraform.io/downloads.html) 0.13.x (the provider was tested against 0.13.1)
 - [Go](https://golang.org/doc/install) 1.15 (to build the provider plugin)
 
 ## Usage
@@ -31,7 +31,7 @@ Add the `required_providers` block to your terraform configuration.
 ```sh
 terraform {
   required_providers {
-    purestorage = {
+    flash = {
       source  = "devans10/flash"
       version = "~> 1.1.2"
     }
@@ -43,7 +43,7 @@ You will also need to list the provider in all of the resources.
 
 ```sh
 resource "purestorage_volume" "vol1" {
-  provider = purestorage
+  provider = flash
   name     = "volume_name"
   size     = 1073741824
 }
@@ -66,7 +66,7 @@ providers {
 ***Configure in TF configuration***
 
 ```sh
-provider "purestorage" {
+provider "flash" {
   api_token  = "${var.purestorage_apitoken}"
   target     = "${var.purestorage_target}"
 }
@@ -75,7 +75,7 @@ provider "purestorage" {
 or
 
 ```sh
-provider "purestorage" {
+provider "flash" {
   username   = "${var.purestorage_username}"
   password   = "${var.purestorage_password}"
   target     = "${var.purestorage_target}"
@@ -87,7 +87,7 @@ provider "purestorage" {
 Set username(`PURE_USERNAME`) and password(`PURE_PASSWORD`) or API Token(`PURE_APITOKEN`) and endpoint(`PURE_TARGET`) in environment.
 
 ```sh
-provider "purestorage" {}
+provider "flash" {}
 ```
 
 ## Building The Provider
@@ -118,8 +118,9 @@ Create one volume
 
 ```sh
 resource "purestorage_volume" "testvol_tf" {
-  name = "testvol_tf"
-  size = "1048000000"
+  provider = flash
+  name     = "testvol_tf"
+  size     = "1048000000"
 }
 ```
 
@@ -127,8 +128,9 @@ Copy a volume
 
 ```sh
 resource "purestorage_volume" "testvol_tf_copy" {
-  name = "testvol_tf_copy"
-  source = "testvol_tf"
+  provider = flash
+  name     = "testvol_tf_copy"
+  source   = "testvol_tf"
 }
 ```
 
@@ -136,7 +138,8 @@ Create a host
 
 ```sh
 resource "purestorage_host" "testhosttf" {
-  name = "testhosttf"
+  provider = flash
+  name     = "testhosttf"
   volume {
     vol = "testvol_tf"
     lun = 1
@@ -148,8 +151,9 @@ Create a hostgroup
 
 ```sh
 resource "purestorage_hostgroup" "testhgrouptf" {
-  name = "testhgrouptf"
-  hosts = ["testhosttf"]
+  provider = flash
+  name     = "testhgrouptf"
+  hosts    = ["testhosttf"]
   volume {
     vol = "testvol_tf_copy"
     lun = 250
@@ -163,8 +167,9 @@ Protection Group has a hosts, hgroups, and volumes parameters, but only 1 can be
 
 ```sh
 resource "purestorage_protectiongroup" "testpgroup" {
-  name = "testpgroup"
-  volumes = ["testvol_tf", "testvol_tf_copy"]
+  provider = flash
+  name     = "testpgroup"
+  volumes  = ["testvol_tf", "testvol_tf_copy"]
 }
 ```
 
