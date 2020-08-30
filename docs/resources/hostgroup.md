@@ -6,7 +6,8 @@ Provides a Pure Storage hostgroup resource.
 
 ```sh
 resource "purestorage_hostgroup" "example" {
-  name = "example"
+  provider = flash
+  name     = "example"
 }
 ```
 

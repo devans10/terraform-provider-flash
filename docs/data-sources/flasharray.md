@@ -8,7 +8,8 @@ Get the FlashArray
 
 ```sh
 data "purestorage_flasharray" "example" {
-  name = "example"
+  provider = flash
+  name     = "example"
 }
 ```
 

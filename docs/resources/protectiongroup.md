@@ -6,7 +6,8 @@ Provides a Pure Storage Protection Group resource.
 
 ```sh
 resource "purestorage_protectiongroup" "example" {
-  name = "example"
+  provider = flash
+  name     = "example"
 }
 ```
 

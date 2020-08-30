@@ -7,7 +7,7 @@ The provider is used to interact with the resources supported by the Pure Storag
 ```sh
 terraform {
   required_providers {
-    purestorage = {
+    flash = {
       source  = "devans10/flash"
       version = "~> 1.1.2"
     }
@@ -20,12 +20,13 @@ variable "purestorage_target" {}
 variable "purestorage_apitoken" {}
 
 # Configure the Pure Storage Provider
-provider "purestorage" {
+provider "flash" {
   target = "${var.purestorage_target}"
   api_token = "${var.purestorage_apitoken}"
 }
 
 resource "purestorage_volume" "vol" {
+  provider = flash
   # ...
 }
 ```

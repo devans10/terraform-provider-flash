@@ -6,8 +6,9 @@ Provides a Pure Storage volume resource
 
 ```sh
 resource "purestorage_volume" "vol" {
-  name = "volume_name"
-  size = 1073741824
+  provider = flash
+  name     = "volume_name"
+  size     = 1073741824
 }
 ```
 
