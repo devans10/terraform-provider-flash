@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.com/devans10/terraform-provider-flash.svg?branch=master)](https://travis-ci.com/devans10/terraform-provider-flash)
 
+## Note: Breaking change with Terraform 0.13. Check the Usage updates below.
+
 This is the repository for the Terraform Provider Flash.  The plugin provides resources for the Pure Storage FlashArray to be managed within Terraform.
 
 For general information about Terraform, visit the [official website](https://terraform.io) and the [GitHub project page.](https://github.com/hashicorp/terraform)
@@ -34,6 +36,16 @@ terraform {
       version = "~> 1.1.2"
     }
   }
+}
+```
+
+You will also need to list the provider in all of the resources.
+
+```sh
+resource "purestorage_volume" "vol1" {
+  provider = purestorage
+  name     = "volume_name"
+  size     = 1073741824
 }
 ```
 
