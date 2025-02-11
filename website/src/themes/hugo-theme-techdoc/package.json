@@ -38,9 +38,9 @@
     "stylelint-config-recommended": "^3.0.0",
     "stylelint-config-recommended-scss": "^4.1.0",
     "stylelint-scss": "^3.13.0",
-    "webpack": "^4.41.5",
+    "webpack": "^5.97.1",
     "webpack-cli": "^3.3.12",
-    "webpack-stream": "^5.2.1"
+    "webpack-stream": "^7.0.0"
   },
   "stylelint": {
     "extends": [
